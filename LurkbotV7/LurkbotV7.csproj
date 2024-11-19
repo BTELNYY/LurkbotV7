@@ -5,10 +5,13 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 
-    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="dotnet build LurkbotV7 --runtime linux-64" />
-    </Target>
+    <ItemGroup>
+      <PackageReference Include="Discord.Net" Version="3.16.0" />
+      <PackageReference Include="YamlDotNet" Version="16.2.0" />
+    </ItemGroup>
 
 </Project>
