@@ -6,7 +6,7 @@ using System.Diagnostics;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Discord.Rest;
-using System.Reflection.Metadata.Ecma335;
+using LurkbotV7.Managers;
 
 namespace LurkbotV7;
 
@@ -60,7 +60,7 @@ public class Program
             return;
         }
         string text = File.ReadAllText(ConfigPath);
-        BotConfig config = (BotConfig)builder.Deserialize(text);
+        BotConfig config = (BotConfig)builder.Deserialize<BotConfig>(text);
         if(config == null)
         {
             Log.Error("Failure to load config: config is null.");
@@ -73,7 +73,7 @@ public class Program
         }
     }
 
-    public static async void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         await new Program().MainAsync(args);
     }
@@ -86,6 +86,7 @@ public class Program
         //Ensure the proper directory is loaded.
         Directory.CreateDirectory(Config.LogPath);
         Log.Info("Starting Lurkbot v" + Version);
+        SLManager.Init();
         DiscordSocketConfig config = new()
         {
             GatewayIntents = GatewayIntents.All,

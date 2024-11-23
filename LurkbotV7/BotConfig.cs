@@ -16,14 +16,28 @@ namespace LurkbotV7
 
         public bool EnableLogging { get; set; } = true;
 
-        public string AccountID { get; set; } = "";
+        public int AccountID { get; set; } = 0;
 
-        public string APIUrl { get; set; } = "";
+        public string APIKey { get; set; } = "";
+
+        public string APIUrl { get; set; } = "https://api.scpslgame.com/serverinfo.php?id={id}&key={key}&list=true&nicknames=true&online=true";
+
+        public Dictionary<int, string> IDToName {  get; set; } = new();
 
         public int RefreshMaxCooldown { get; set; } = 60;
 
         public int RefreshMinCooldown { get; set; } = 20;
 
         public int RefreshCooldown { get; set; } = 30;
+
+        public List<UpdateChannelTarget> updateChannelTargets { get; set; } = new List<UpdateChannelTarget>();
+        
+    }
+
+    public class UpdateChannelTarget
+    {
+        public ulong ServerID { get; set; } = 0;
+
+        public ulong ChannelID { get; set; } = 0;
     }
 }
