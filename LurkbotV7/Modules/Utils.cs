@@ -12,7 +12,9 @@ namespace LurkbotV7.Modules
 {
     public class Utils : CustomInteractionModuleBase<UtilsModuleConfig>
     {
-        [SlashCommand("getavatar", "Gets the avatar of a user.")]
+        [SlashCommand("GetAvatar", "Gets the avatar of a user.")]
+        [RequireContext(ContextType.Guild)]
+        [RequireBotPermission(ChannelPermission.SendMessages, NotAGuildErrorMessage = "This command must be ran in a guild.")]
         public async Task GetAvatar(SocketGuildUser user = null)
         {
             EmbedBuilder eb = new EmbedBuilder();
