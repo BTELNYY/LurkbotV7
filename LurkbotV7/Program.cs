@@ -85,7 +85,19 @@ public class Program
         LoadConfig();
         //Ensure the proper directory is loaded.
         Directory.CreateDirectory(Config.LogPath);
-        Log.Info("Starting Lurkbot v" + Version);
+        Directory.CreateDirectory(ConfigurationManager.CONFIGPATH);
+        Log.Info(@$"
+
+  mmmm    m                    m      ""                         m                    #      mmmmm           m
+ #""   "" mm#mm   mmm    m mm  mm#mm  mmm    m mm    mmmm         #      m   m   m mm  #   m  #    #  mmm   mm#mm
+ ""#mmm    #    ""   #   #""  ""   #      #    #""  #  #"" ""#         #      #   #   #""  "" # m""   #mmmm"" #"" ""#    #
+     ""#   #    m""""""#   #       #      #    #   #  #   #         #      #   #   #     #""#    #    # #   #    #
+ ""mmm#""   ""mm  ""mm""#   #       ""mm  mm#mm  #   #  ""#m""#         #mmmmm ""mm""#   #     #  ""m  #mmmm"" ""#m#""    ""mm
+                                                   m  #
+                                                    """"
+Version: {Version}
+");
+        ConfigurationManager.Init();
         SLManager.Init();
         DiscordSocketConfig config = new()
         {
