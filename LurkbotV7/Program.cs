@@ -7,6 +7,12 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Discord.Rest;
 using LurkbotV7.Managers;
+using System.Reflection;
+using LurkbotV7.Attributes;
+using Microsoft.Extensions.DependencyInjection;
+using LurkbotV7.Modules;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using LurkbotV7.Config;
 
 namespace LurkbotV7;
 
@@ -21,6 +27,8 @@ public class Program
     public static DiscordSocketClient _client;
 
     public static InteractionService _interaction;
+
+    public static IServiceProvider _services;
 
     public static BotConfig Config
     {
@@ -109,17 +117,59 @@ Version: {Version}
         { 
             //TODO, fill in.
         };
+        _services = ConfigureServices();
         _interaction = new InteractionService(_client, interactionServiceConfig);
         _client.Log += ClientLog;
         _client.Ready += ClientReady;
+        _client.SlashCommandExecuted += async (x) =>
+        {
+            Log.Debug($"Command execute. Command: {x.CommandName}");
+            var ctx = new SocketInteractionContext(_client, x);
+            await _interaction.ExecuteCommandAsync(ctx, _services);
+        };
+        await _client.StartAsync();
         await _client.LoginAsync(TokenType.Bot, Config.BotToken);
         await Task.Delay(-1);
     }
 
-    private Task ClientReady()
+    private static IServiceProvider ConfigureServices()
     {
+        var map = new ServiceCollection();
 
-        return Task.CompletedTask;
+        //Cheap hack to avoid some retards service checker for fucking properties. 
+        //If you have a fucking attribute to ignore the check, USE IT YOU FUCKING DUMBASS!
+        //NEVER, FUCKING NEVER TOUCH C# AGAIN!
+        foreach (Type t in Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsSubclassOf(typeof(ModuleConfiguration))))
+        {
+            Log.Info($"Add Dependency: {t.Name}");
+            map.AddSingleton(t);
+        }
+
+        return map.BuildServiceProvider();
+    }
+
+
+    private async Task ClientReady()
+    {
+        //foreach (var cmd in await _client.GetGlobalApplicationCommandsAsync())
+        //{
+        //    Log.Info($"Delete: {cmd.Name}");
+        //    await cmd.DeleteAsync();
+        //}
+        try
+        {
+            List<Type> targets = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.GetCustomAttribute(typeof(ModuleAttribute)) != null).ToList();
+            foreach (Type t in targets)
+            {
+                Log.Info($"Register Module: {t.Name}");
+                await _interaction.AddModuleAsync(t, _services);
+            }
+            await _interaction.RegisterCommandsGloballyAsync();
+        }
+        catch(Exception ex)
+        {
+            Log.Error(ex.ToString()); 
+        }
     }
 
     private Task ClientLog(LogMessage arg)

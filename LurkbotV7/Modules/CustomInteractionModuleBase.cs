@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using Discord.Commands;
+using Discord.Interactions;
 using LurkbotV7.Config;
 using LurkbotV7.Managers;
 using System;
@@ -18,6 +19,7 @@ namespace LurkbotV7.Modules
 
         private T _config = default(T);
 
+        [DontInject]
         public T Config
         {
             get
@@ -28,7 +30,7 @@ namespace LurkbotV7.Modules
                 }
                 return _config;
             }
-            set
+            protected set
             {
                 _config = value;
                 SaveConfig();
@@ -38,6 +40,11 @@ namespace LurkbotV7.Modules
         public void SaveConfig()
         {
             ConfigurationManager.SaveConfiguration(_config);
+        }
+
+        public void SaveConfig(T config)
+        {
+            Config = config;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Discord.Interactions;
+using LurkbotV7.Attributes;
 using LurkbotV7.Config;
 using LurkbotV7.Managers;
 using System;
@@ -10,9 +11,10 @@ using System.Threading.Tasks;
 
 namespace LurkbotV7.Modules
 {
+    [Module]
     public class SLUtils : CustomInteractionModuleBase<SLUtilsConfiguration>
     {
-        [SlashCommand("GetPlayers", "Gets online players")]
+        [SlashCommand("getplayers", "Gets online players")]
         [RequireContext(ContextType.Guild)]
         public async Task GetPlayers()
         {
