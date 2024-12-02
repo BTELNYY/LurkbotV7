@@ -26,9 +26,9 @@ public class Program
 
     public static DiscordSocketClient Client;
 
-    public static InteractionService _interaction;
+    public static InteractionService InteractionServices;
 
-    public static IServiceProvider _services;
+    public static IServiceProvider Services;
 
     public static BotConfig Config
     {
@@ -73,12 +73,12 @@ public class Program
         {
             Log.Error("Failure to load config: config is null.");
             Config = new BotConfig();
-            SaveConfig();
         }
         else
         {
             Config = config;
         }
+        SaveConfig();
     }
 
     public static async Task Main(string[] args)
@@ -106,26 +106,26 @@ public class Program
 Version: {Version}
 ");
         ConfigurationManager.Init();
-        SLManager.Init();
         DiscordSocketConfig config = new()
         {
             GatewayIntents = GatewayIntents.All,
             MessageCacheSize = 50,
+            LogLevel = LogSeverity.Debug,
         };
         Client = new(config);
         InteractionServiceConfig interactionServiceConfig = new()
         { 
             //TODO, fill in.
         };
-        _services = ConfigureServices();
-        _interaction = new InteractionService(Client, interactionServiceConfig);
         Client.Log += ClientLog;
         Client.Ready += ClientReady;
+        Services = ConfigureServices();
+        InteractionServices = new InteractionService(Client, interactionServiceConfig);
         Client.SlashCommandExecuted += async (x) =>
         {
-            Log.Debug($"Command execute. Command: {x.CommandName}");
+            //Log.Debug($"Command execute. Command: {x.CommandName}");
             var ctx = new SocketInteractionContext(Client, x);
-            await _interaction.ExecuteCommandAsync(ctx, _services);
+            await InteractionServices.ExecuteCommandAsync(ctx, Services);
         };
         await Client.StartAsync();
         await Client.LoginAsync(TokenType.Bot, Config.BotToken);
@@ -151,6 +151,7 @@ Version: {Version}
 
     private async Task ClientReady()
     {
+        SLManager.Init();
         //foreach (var cmd in await _client.GetGlobalApplicationCommandsAsync())
         //{
         //    Log.Info($"Delete: {cmd.Name}");
@@ -162,9 +163,9 @@ Version: {Version}
             foreach (Type t in targets)
             {
                 Log.Info($"Register Module: {t.Name}");
-                await _interaction.AddModuleAsync(t, _services);
+                await InteractionServices.AddModuleAsync(t, Services);
             }
-            await _interaction.RegisterCommandsGloballyAsync();
+            await InteractionServices.RegisterCommandsGloballyAsync();
         }
         catch(Exception ex)
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace LurkbotV7.Config
 {
@@ -16,6 +17,7 @@ namespace LurkbotV7.Config
             }
         }
 
+        [YamlIgnore]
         public virtual string FileName { get; set; } = "config";
     }
 }

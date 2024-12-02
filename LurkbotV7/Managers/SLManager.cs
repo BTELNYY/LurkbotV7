@@ -254,9 +254,14 @@ public static class SLManager
 
     public static async Task UpdateEmbeds()
     {
-        foreach(UpdateChannelTarget target in Program.Config.UpdateChannelTargets)
+        foreach(ChannelTarget target in Program.Config.UpdateChannelTargets)
         {
-            SocketGuild guild = Program._client.GetGuild(target.ServerID);
+            SocketGuild guild = Program.Client.GetGuild(target.ServerID);
+            if(guild == null)
+            {
+                Log.Error($"Guild {target.ServerID} is not found.");
+                continue;
+            }
             SocketGuildChannel guildChannel = guild.GetChannel(target.ChannelID);
             if(guildChannel is not SocketTextChannel channel)
             {
@@ -274,7 +279,7 @@ public static class SLManager
                 continue;
             }
             //Log.Debug("Searching for messages from bot");
-            var botMes = meses.Where((message => message.Author.Id == Program._client.CurrentUser.Id));
+            var botMes = meses.Where((message => message.Author.Id == Program.Client.CurrentUser.Id));
             //Log.Debug("Getting first bot message");
             if (!botMes.Any())
             {
