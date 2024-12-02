@@ -30,11 +30,11 @@ namespace LurkbotV7
 
         public int RefreshCooldown { get; set; } = 30;
 
-        public List<UpdateChannelTarget> updateChannelTargets { get; set; } = new List<UpdateChannelTarget>();
+        public List<ChannelTarget> UpdateChannelTargets { get; set; } = new List<ChannelTarget>();
         
     }
 
-    public class UpdateChannelTarget
+    public class ChannelTarget
     {
         public ulong ServerID { get; set; } = 0;
 

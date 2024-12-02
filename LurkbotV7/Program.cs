@@ -24,7 +24,7 @@ public class Program
 
     public const string ConfigPath = "./config.yml";
 
-    public static DiscordSocketClient _client;
+    public static DiscordSocketClient Client;
 
     public static InteractionService _interaction;
 
@@ -112,23 +112,23 @@ Version: {Version}
             GatewayIntents = GatewayIntents.All,
             MessageCacheSize = 50,
         };
-        _client = new(config);
+        Client = new(config);
         InteractionServiceConfig interactionServiceConfig = new()
         { 
             //TODO, fill in.
         };
         _services = ConfigureServices();
-        _interaction = new InteractionService(_client, interactionServiceConfig);
-        _client.Log += ClientLog;
-        _client.Ready += ClientReady;
-        _client.SlashCommandExecuted += async (x) =>
+        _interaction = new InteractionService(Client, interactionServiceConfig);
+        Client.Log += ClientLog;
+        Client.Ready += ClientReady;
+        Client.SlashCommandExecuted += async (x) =>
         {
             Log.Debug($"Command execute. Command: {x.CommandName}");
-            var ctx = new SocketInteractionContext(_client, x);
+            var ctx = new SocketInteractionContext(Client, x);
             await _interaction.ExecuteCommandAsync(ctx, _services);
         };
-        await _client.StartAsync();
-        await _client.LoginAsync(TokenType.Bot, Config.BotToken);
+        await Client.StartAsync();
+        await Client.LoginAsync(TokenType.Bot, Config.BotToken);
         await Task.Delay(-1);
     }
 

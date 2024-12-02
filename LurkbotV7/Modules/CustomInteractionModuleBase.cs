@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using LurkbotV7.Config;
 using LurkbotV7.Managers;
@@ -12,6 +13,17 @@ namespace LurkbotV7.Modules
 {
     public class CustomInteractionModuleBase<T> : InteractionModuleBase<SocketInteractionContext> where T : ModuleConfiguration
     {
+        protected virtual async void RespondWithExceptionAsync(Exception ex)
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.WithColor(Color.Red);
+            builder.WithCurrentTimestamp();
+            builder.WithTitle("An Exception Occured");
+            builder.WithDescription($"```{ex.ToString()}```");
+            await RespondAsync(embed: builder.Build());
+        }
+
+
         public CustomInteractionModuleBase()
         {
             _config = ConfigurationManager.GetConfiguration<T>();
