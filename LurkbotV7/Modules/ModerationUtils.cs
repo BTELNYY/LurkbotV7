@@ -74,6 +74,8 @@ namespace LurkbotV7.Modules
                         builder.AddField("Target", memberUpdateData.Target.Value.Mention);
                     }
                     break;
+                default:
+                    return;
             }
             foreach(ChannelTarget target in Config.AuditLogTargets)
             {

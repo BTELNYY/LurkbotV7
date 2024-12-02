@@ -13,16 +13,41 @@ namespace LurkbotV7.Modules
 {
     public class CustomInteractionModuleBase<T> : InteractionModuleBase<SocketInteractionContext> where T : ModuleConfiguration
     {
-        protected virtual async void RespondWithExceptionAsync(Exception ex)
+        protected virtual async void RespondWithExceptionAsync(Exception ex, bool hidden = false)
         {
             EmbedBuilder builder = new EmbedBuilder();
             builder.WithColor(Color.Red);
             builder.WithCurrentTimestamp();
             builder.WithTitle("An Exception Occured");
             builder.WithDescription($"```{ex.ToString()}```");
-            await RespondAsync(embed: builder.Build());
+            await RespondAsync(embed: builder.Build(), ephemeral: hidden);
         }
 
+        protected virtual async void RespondWithErrorAsync(string error, string title = "Error", bool hidden = false)
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.WithColor(Color.Red);
+            builder.WithCurrentTimestamp();
+            builder.WithTitle(title);
+            if(!string.IsNullOrEmpty(error))
+            {
+                builder.WithDescription($"`{error}`");
+            }
+            await RespondAsync(embed: builder.Build(), ephemeral: hidden);
+        }
+
+        protected virtual async void RespondWithSuccesAsync(string success, string title = "Success", bool hidden = false)
+        {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.WithColor(Color.Green);
+            builder.WithCurrentTimestamp();
+            builder.WithTitle(title);
+            if (!string.IsNullOrEmpty(success))
+            {
+                builder.WithDescription($"`{success}`");
+            }
+            await RespondAsync(embed: builder.Build(), ephemeral: hidden);
+        }
 
         public CustomInteractionModuleBase()
         {
