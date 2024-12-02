@@ -1,11 +1,7 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using Newtonsoft.Json;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LurkbotV7.Managers;
 public static class SLManager
@@ -70,7 +66,7 @@ public static class SLManager
             }
             builder.WithCurrentTimestamp();
             builder.WithTitle(name);
-            if(server.Online)
+            if(server.Online && server.PlayersList.Length > 0)
             {
                 builder.WithColor(Color.Green);
                 builder.AddField("Playercount", server.PlayersList.Length);
@@ -79,6 +75,11 @@ public static class SLManager
                 desc = desc.Trim();
                 desc += "```";
                 builder.WithDescription(desc);
+            }
+            else if(server.Online && server.PlayersList.Length == 0)
+            {
+                builder.WithColor(Color.Orange);
+                builder.WithDescription("Server is empty.");
             }
             else
             {
@@ -92,12 +93,12 @@ public static class SLManager
 
     public static void PullData()
     {
-        Log.Info("Pulling data...");
-        Log.Info("Creating request...");
+        Log.Debug("Pulling data...");
+        Log.Debug("Creating request...");
         var request = new RestRequest(Program.Config.APIUrl.Replace("{id}", Program.Config.AccountID.ToString()).Replace("{key}", Program.Config.APIKey), Method.Get);
-        Log.Info("Fetching...");
+        Log.Debug("Fetching...");
         var resp = client.ExecuteAsync(request);
-        Log.Info("Deserializing " + resp.Result.Content);
+        Log.Debug("Deserializing " + resp.Result.Content);
         var data = JsonConvert.DeserializeObject<Response>(resp.Result.Content);
         if (!data.Success)
         {
@@ -119,13 +120,13 @@ public static class SLManager
         else
         {
             cooldown = Program.Config.RefreshCooldown;
-            Log.Info("Setting Requested Cooldown to: " + Program.Config.RefreshCooldown + "; Cooldown Used: " + cooldown);
+            Log.Debug("Setting Requested Cooldown to: " + Program.Config.RefreshCooldown + "; Cooldown Used: " + cooldown);
         }
 
         totalPlayerCount = data.Servers.Sum(x => x.PlayersList.Length);
         allPlayers = data.Servers.Select(x => x.PlayersList).SelectMany(x => x).ToArray();
 
-        Log.Info($"Playercount: {totalPlayerCount}; (Player Details Omitted for brevity) Cooldown: {cooldown}");
+        Log.Debug($"Playercount: {totalPlayerCount}; (Player Details Omitted for brevity) Cooldown: {cooldown}");
         OldPlayers.Clear();
         NameToObject.Clear();
         IDToObject.Clear();
@@ -184,7 +185,7 @@ public static class SLManager
         }
         Players = data.Servers.Select(x => x.PlayersList).SelectMany(x => x).ToList();
         Response = data;
-        Log.Info("List Refresh complete, called event");
+        Log.Debug("List Refresh complete, called event");
         ListRefreshed?.Invoke();
         return;
     }
@@ -226,8 +227,8 @@ public static class SLManager
         Log.Debug("second foreach in playerchange detector done, invoking");
         PlayersJoinedEvent?.Invoke(JoinedPlayers);
         PlayersLeftEvent?.Invoke(LeftPlayers);
-        Log.Info("Players who left since last check: " + string.Join(", ", LeftPlayersNames));
-        Log.Info("Players who joined since last check: " + string.Join(", ", JoinedPlayersNames));
+        Log.Debug("Players who left since last check: " + string.Join(", ", LeftPlayersNames));
+        Log.Debug("Players who joined since last check: " + string.Join(", ", JoinedPlayersNames));
         return;
     }
     public static void Init()
@@ -240,16 +241,71 @@ public static class SLManager
 
     public static Thread Runner { get; set; } = null;
 
-    public static void UpdateThread()
+    public async static void UpdateThread()
     {
         while (true)
         {
             PullData();
-            Log.Info($"Waiting {cooldown} seconds");
+            await UpdateEmbeds();
+            Log.Debug($"Waiting {cooldown} seconds");
             Thread.Sleep(cooldown * 1000);
         }
     }
+
+    public static async Task UpdateEmbeds()
+    {
+        foreach(UpdateChannelTarget target in Program.Config.UpdateChannelTargets)
+        {
+            SocketGuild guild = Program._client.GetGuild(target.ServerID);
+            SocketGuildChannel guildChannel = guild.GetChannel(target.ChannelID);
+            if(guildChannel is not SocketTextChannel channel)
+            {
+                Log.Error($"Channel {guildChannel.Name} in Guild {guild.Name}");
+                continue;
+            }
+            Embed[] embeds = GetEmbeds();
+            //Log.Debug("Channel obtained");
+            var meses = await channel.GetMessagesAsync().FlattenAsync();
+            //Log.Debug("Messages obtained");
+            if (meses == null)
+            {
+                Log.Warning("No messages in channel");
+                await channel.SendMessageAsync(embeds: embeds);
+                continue;
+            }
+            //Log.Debug("Searching for messages from bot");
+            var botMes = meses.Where((message => message.Author.Id == Program._client.CurrentUser.Id));
+            //Log.Debug("Getting first bot message");
+            if (!botMes.Any())
+            {
+                //Log.Warning("No bot messages!");
+                await channel.SendMessageAsync(embeds: embeds);
+                continue;
+            }
+            var messagetoEdit = botMes.First();
+            //Log.Debug("Checking dat shit");
+            if (messagetoEdit == null)
+            {
+                // create new message
+                //Log.Debug("Create new message");
+                await channel.SendMessageAsync(embeds: embeds);
+            }
+            else
+            {
+                // edit message
+                //Log.Debug("Edit message");
+                var mestoEdituser = messagetoEdit as IUserMessage;
+                if (mestoEdituser == null)
+                {
+                    //Log.Fatal("not a IUserMessage");
+                    continue;
+                }
+                await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
+            }
+        }
+    }
 }
+
 //un-nested the structs so you can access them
 public struct Response
 {
