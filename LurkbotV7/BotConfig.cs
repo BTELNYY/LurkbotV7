@@ -14,6 +14,8 @@ namespace LurkbotV7
 
         public string LogPath { get; set; } = "./logs/";
 
+        public string CachePath { get; set; } = "./cache/";
+
         public bool EnableLogging { get; set; } = true;
 
         public int AccountID { get; set; } = 0;

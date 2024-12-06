@@ -1,12 +1,14 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.Net.Converters;
+using Discord.Rest;
 using Discord.WebSocket;
 using LurkbotV7.Attributes;
 using LurkbotV7.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +17,59 @@ namespace LurkbotV7.Modules
     [Module]
     public class ModerationUtils : CustomInteractionModuleBase<ModerationUtilsConfig>
     {
+        [MessageCommand("Delete and Audit")]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(ChannelPermission.ManageMessages)]
+        public async Task DeleteMessageAuditLog(IMessage message)
+        {
+            EmbedBuilder eb = new EmbedBuilder();
+            if (Context.Channel is not SocketGuildChannel channel)
+            {
+                RespondWithErrorAsync("This command can only be ran in a guild.").RunSynchronously();
+                return;
+            }
+            if(message is not SocketMessage socketMessage)
+            {
+                RespondWithErrorAsync("Failed to convert IMessage into SocketMessage.").RunSynchronously();
+                return;
+            }
+            eb.WithTitle("Message was deleted");
+            eb.WithColor(Color.LightOrange);
+            eb.WithDescription("Since this was done via the application command, it is counted as an audit. **Deleting through the right click context menu will not produce this message.** \nDeleted content is attached below.");
+            eb.WithCurrentTimestamp();
+            eb.AddField("Created", new TimestampTag(DateTime.Now, TimestampTagStyles.Relative));
+            eb.AddField("Server", channel.Guild.Name);
+            eb.AddField("Action", "Message Delete");
+            eb.AddField("Channel", "<#" + channel.Id + ">");
+            string content = string.IsNullOrEmpty(message.Content) ? "<No Content, likely an embed>" : message.Content;
+            eb.AddField("Content", content);
+            eb.WithAuthor(Context.User);
+            Embed[] embeds = new Embed[1 + message.Embeds.Count + message.Attachments.Count];
+            embeds[0] = eb.Build();
+            int counter = 1;
+            foreach(Embed embed in message.Embeds)
+            {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.WithUrl(embed.Url);
+                builder.WithColor(Color.LightOrange);
+                builder.WithAuthor(message.Author);
+                embeds[counter] = builder.Build();
+                counter++;
+            }
+            foreach(IAttachment attachment in message.Attachments)
+            {
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.WithUrl(attachment.Url);
+                builder.WithAuthor(message.Author);
+                builder.WithColor(Color.LightOrange);
+                embeds[counter] = builder.Build();
+            }
+            await socketMessage.DeleteAsync().ConfigureAwait(true);
+            await RespondWithSuccesAsync("Done.", hidden: true).ConfigureAwait(true);
+            await SendAuditLog(embeds).ConfigureAwait(true);
+            return;
+        }
+
         public override void OnModuleBuilding(InteractionService commandService, ModuleInfo module)
         {
             base.OnModuleBuilding(commandService, module);
@@ -87,6 +142,18 @@ namespace LurkbotV7.Modules
                 default:
                     return Task.CompletedTask;
             }
+            SendAuditLog(builder.Build()).RunSynchronously();
+            return Task.CompletedTask;
+        }
+
+       
+        public Task SendAuditLog(Embed embed)
+        {
+            return SendAuditLog(new Embed[] { embed });
+        }
+
+        public Task SendAuditLog(Embed[] embeds)
+        {
             foreach (ChannelTarget target in Config.AuditLogTargets)
             {
                 SocketGuild targetGuild = Program.Client.GetGuild(target.ServerID);
@@ -98,15 +165,15 @@ namespace LurkbotV7.Modules
                 SocketGuildChannel targetChannel = targetGuild.GetChannel(target.ChannelID);
                 if (targetGuild == null)
                 {
-                    Log.Error($"Invalid Channel Target in ModerationUtils. ID: {target.ChannelID}, Server: {guild.Name}");
+                    Log.Error($"Invalid Channel Target in ModerationUtils. ID: {target.ChannelID}, Server: {targetGuild.Name}");
                     continue;
                 }
                 if (targetChannel is not SocketTextChannel targetTextChannel)
                 {
-                    Log.Error($"Invalid Channel Target in ModerationUtils. Not a text channel. Name: {targetChannel.Name}, Server: {guild.Name}");
+                    Log.Error($"Invalid Channel Target in ModerationUtils. Not a text channel. Name: {targetChannel.Name}, Server: {targetGuild.Name}");
                     continue;
                 }
-                targetTextChannel.SendMessageAsync(embed: builder.Build()).RunSynchronously();
+                targetTextChannel.SendMessageAsync(embeds: embeds).RunSynchronously();
             }
             return Task.CompletedTask;
         }
