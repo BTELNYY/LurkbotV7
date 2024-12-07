@@ -86,6 +86,8 @@ public class Program
         await new Program().MainAsync(args);
     }
 
+    public static bool DestoryCommands = false;
+
     public async Task MainAsync(string[] args)
     {
         Config = new BotConfig();
@@ -105,6 +107,10 @@ public class Program
                                                     """"
 Version: {Version}
 ");
+        if(args.Contains("--delete-commands"))
+        {
+            DestoryCommands = true;
+        }
         ConfigurationManager.Init();
         DiscordSocketConfig config = new()
         {
@@ -157,11 +163,16 @@ Version: {Version}
     private async Task ClientReady()
     {
         SLManager.Init();
-        //foreach (var cmd in await _client.GetGlobalApplicationCommandsAsync())
-        //{
-        //    Log.Info($"Delete: {cmd.Name}");
-        //    await cmd.DeleteAsync();
-        //}
+        if (DestoryCommands)
+        {
+            Log.Info("Delete Commands!");
+            foreach (var cmd in await Client.GetGlobalApplicationCommandsAsync())
+            {
+                Log.Info($"Delete: {cmd.Name}");
+                await cmd.DeleteAsync();
+            }
+            Environment.Exit(0);
+        }
         try
         {
             List<Type> targets = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.GetCustomAttribute(typeof(ModuleAttribute)) != null).ToList();

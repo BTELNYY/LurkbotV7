@@ -56,37 +56,36 @@ namespace LurkbotV7.Modules
                 embeds[counter] = builder.Build();
                 counter++;
             }
-            List<FileAttachment> attachmentsToUpload = new();
-            foreach(IAttachment attachment in message.Attachments)
-            {
-                FileAttachment attach = new FileAttachment(attachment.DownloadAttachment());
-                attachmentsToUpload.Add(attach);
-            }
+            //List<FileAttachment> attachmentsToUpload = new();
+            //foreach(IAttachment attachment in message.Attachments)
+            //{
+            //    FileAttachment attach = new FileAttachment(attachment.DownloadAttachment());
+            //    attachmentsToUpload.Add(attach);
+            //}
             await socketMessage.DeleteAsync().ConfigureAwait(true);
             await RespondWithSuccesAsync("Done.", hidden: true).ConfigureAwait(true);
-            await SendAuditLog(embeds).ConfigureAwait(true);
-            foreach (ChannelTarget target in Config.AuditLogTargets)
-            {
-                SocketGuild targetGuild = Program.Client.GetGuild(target.ServerID);
-                if (targetGuild == null)
-                {
-                    Log.Error($"Invalid Guild Target in ModerationUtils. ID: {target.ServerID}");
-                    continue;
-                }
-                SocketGuildChannel targetChannel = targetGuild.GetChannel(target.ChannelID);
-                if (targetGuild == null)
-                {
-                    Log.Error($"Invalid Channel Target in ModerationUtils. ID: {target.ChannelID}, Server: {targetGuild.Name}");
-                    continue;
-                }
-                if (targetChannel is not SocketTextChannel targetTextChannel)
-                {
-                    Log.Error($"Invalid Channel Target in ModerationUtils. Not a text channel. Name: {targetChannel.Name}, Server: {targetGuild.Name}");
-                    continue;
-                }
-                await targetTextChannel.SendFilesAsync(attachmentsToUpload).ConfigureAwait(true);
-            }
-            return;
+            await SendAuditLog(embeds).ConfigureAwait(false);
+            //foreach (ChannelTarget target in Config.AuditLogTargets)
+            //{
+            //    SocketGuild targetGuild = Program.Client.GetGuild(target.ServerID);
+            //    if (targetGuild == null)
+            //    {
+            //        Log.Error($"Invalid Guild Target in ModerationUtils. ID: {target.ServerID}");
+            //        continue;
+            //    }
+            //    SocketGuildChannel targetChannel = targetGuild.GetChannel(target.ChannelID);
+            //    if (targetGuild == null)
+            //    {
+            //        Log.Error($"Invalid Channel Target in ModerationUtils. ID: {target.ChannelID}, Server: {targetGuild.Name}");
+            //        continue;
+            //    }
+            //    if (targetChannel is not SocketTextChannel targetTextChannel)
+            //    {
+            //        Log.Error($"Invalid Channel Target in ModerationUtils. Not a text channel. Name: {targetChannel.Name}, Server: {targetGuild.Name}");
+            //        continue;
+            //    }
+            //    await targetTextChannel.SendFilesAsync(attachmentsToUpload).ConfigureAwait(true);
+            //}
         }
 
         public override void OnModuleBuilding(InteractionService commandService, ModuleInfo module)
