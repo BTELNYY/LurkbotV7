@@ -22,7 +22,13 @@ public class Program
 
     static BotConfig _config;
 
-    public const string ConfigPath = "./config.yml";
+    public static string ConfigPath
+    {
+        get
+        {
+            return Path.Combine(Directory.GetCurrentDirectory(), "config.yml");
+        }
+    }
 
     public static DiscordSocketClient Client;
 
@@ -91,10 +97,8 @@ public class Program
     public async Task MainAsync(string[] args)
     {
         Config = new BotConfig();
-        Directory.CreateDirectory(Config.LogPath);
+        Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), Config.LogPath));
         LoadConfig();
-        //Ensure the proper directory is loaded.
-        Directory.CreateDirectory(Config.LogPath);
         Directory.CreateDirectory(ConfigurationManager.CONFIGPATH);
         Log.Info(@$"
 

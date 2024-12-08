@@ -18,7 +18,13 @@ namespace LurkbotV7.Managers
 
         }
 
-        public const string CONFIGPATH = "./config/";
+        public static string CONFIGPATH
+        {
+            get
+            {
+                return Path.Combine(Directory.GetCurrentDirectory(), "config");
+            }
+        }
 
         public static void SaveConfiguration<T>(T input) where T : ModuleConfiguration
         {

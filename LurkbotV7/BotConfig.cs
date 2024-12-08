@@ -12,9 +12,9 @@ namespace LurkbotV7
 
         public bool ShowLogsInConsole { get; set; } = true;
 
-        public string LogPath { get; set; } = "./logs/";
+        public string LogPath { get; set; } = "logs";
 
-        public string CachePath { get; set; } = "./cache/";
+        public string CachePath { get; set; } = "cache";
 
         public bool EnableLogging { get; set; } = true;
 
