@@ -56,37 +56,48 @@ public static class SLManager
     public static Embed[] GetEmbeds()
     {
         List<Embed> embeds = new List<Embed>();
-        foreach(Server server in Response.Servers)
+        if(Response.Servers == null)
         {
             EmbedBuilder builder = new EmbedBuilder();
-            string name = "No Name";
-            if(Program.Config.IDToName.ContainsKey(server.ID))
-            {
-                name = Program.Config.IDToName[server.ID];
-            }
             builder.WithCurrentTimestamp();
-            builder.WithTitle(name);
-            if(server.Online && server.PlayersList.Length > 0)
+            builder.Color = Color.Red;
+            builder.WithTitle("Error occured");
+            builder.WithDescription("Failed to get server status. Error: " + Response.Error);
+        }
+        else
+        {
+            foreach (Server server in Response.Servers)
             {
-                builder.WithColor(Color.Green);
-                builder.AddField("Playercount", server.PlayersList.Length);
-                string desc = "```";
-                desc += string.Join(",\n", server.PlayersList.Select(x => x.Nickname));
-                desc = desc.Trim();
-                desc += "```";
-                builder.WithDescription(desc);
+                EmbedBuilder builder = new EmbedBuilder();
+                string name = "No Name";
+                if (Program.Config.IDToName.ContainsKey(server.ID))
+                {
+                    name = Program.Config.IDToName[server.ID];
+                }
+                builder.WithCurrentTimestamp();
+                builder.WithTitle(name);
+                if (server.Online && server.PlayersList.Length > 0)
+                {
+                    builder.WithColor(Color.Green);
+                    builder.AddField("Playercount", server.PlayersList.Length);
+                    string desc = "```";
+                    desc += string.Join(",\n", server.PlayersList.Select(x => x.Nickname));
+                    desc = desc.Trim();
+                    desc += "```";
+                    builder.WithDescription(desc);
+                }
+                else if (server.Online && server.PlayersList.Length == 0)
+                {
+                    builder.WithColor(Color.Orange);
+                    builder.WithDescription("Server is empty.");
+                }
+                else
+                {
+                    builder.WithColor(Color.Red);
+                    builder.WithDescription("Server is offline.");
+                }
+                embeds.Add(builder.Build());
             }
-            else if(server.Online && server.PlayersList.Length == 0)
-            {
-                builder.WithColor(Color.Orange);
-                builder.WithDescription("Server is empty.");
-            }
-            else
-            {
-                builder.WithColor(Color.Red);
-                builder.WithDescription("Server is offline.");
-            }
-            embeds.Add(builder.Build());
         }
         return embeds.ToArray();
     }
@@ -231,6 +242,7 @@ public static class SLManager
         Log.Debug("Players who joined since last check: " + string.Join(", ", JoinedPlayersNames));
         return;
     }
+
     public static void Init()
     {
         ListRefreshed += PlayerChangeDetector;
@@ -241,18 +253,18 @@ public static class SLManager
 
     public static Thread Runner { get; set; } = null;
 
-    public async static void UpdateThread()
+    public static void UpdateThread()
     {
         while (true)
         {
             PullData();
-            await UpdateEmbeds();
+            UpdateEmbeds();
             Log.Debug($"Waiting {cooldown} seconds");
             Thread.Sleep(cooldown * 1000);
         }
     }
 
-    public static async Task UpdateEmbeds()
+    public static void UpdateEmbeds()
     {
         foreach(ChannelTarget target in Program.Config.UpdateChannelTargets)
         {
@@ -270,12 +282,12 @@ public static class SLManager
             }
             Embed[] embeds = GetEmbeds();
             //Log.Debug("Channel obtained");
-            var meses = await channel.GetMessagesAsync().FlattenAsync();
+            var meses = channel.GetMessagesAsync().FlattenAsync().Result;
             //Log.Debug("Messages obtained");
             if (meses == null)
             {
                 Log.Warning("No messages in channel");
-                await channel.SendMessageAsync(embeds: embeds);
+                channel.SendMessageAsync(embeds: embeds);
                 continue;
             }
             //Log.Debug("Searching for messages from bot");
@@ -284,7 +296,7 @@ public static class SLManager
             if (!botMes.Any())
             {
                 //Log.Warning("No bot messages!");
-                await channel.SendMessageAsync(embeds: embeds);
+                channel.SendMessageAsync(embeds: embeds);
                 continue;
             }
             var messagetoEdit = botMes.First();
@@ -293,7 +305,7 @@ public static class SLManager
             {
                 // create new message
                 //Log.Debug("Create new message");
-                await channel.SendMessageAsync(embeds: embeds);
+                channel.SendMessageAsync(embeds: embeds);
             }
             else
             {
@@ -305,7 +317,7 @@ public static class SLManager
                     //Log.Fatal("not a IUserMessage");
                     continue;
                 }
-                await mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
+                mestoEdituser.ModifyAsync(properties => { properties.Embeds = embeds.ToArray(); });
             }
         }
     }

@@ -24,7 +24,7 @@ namespace LurkbotV7
 
         public string APIUrl { get; set; } = "https://api.scpslgame.com/serverinfo.php?id={id}&key={key}&list=true&nicknames=true&online=true";
 
-        public Dictionary<int, string> IDToName {  get; set; } = new();
+        public Dictionary<int, string> IDToName { get; set; } = new();
 
         public int RefreshMaxCooldown { get; set; } = 60;
 
@@ -32,19 +32,7 @@ namespace LurkbotV7
 
         public int RefreshCooldown { get; set; } = 30;
 
-        public List<ChannelTarget> UpdateChannelTargets { get; set; } = new List<ChannelTarget>() 
-        {
-            new ChannelTarget()
-            {
-                ServerID = 653788451380002817,
-                ChannelID = 977450334047834113,
-            },
-            new ChannelTarget()
-            {
-                ServerID = 951311770843230238,
-                ChannelID = 1182193099376697436
-            }
-        };
+        public List<ChannelTarget> UpdateChannelTargets { get; set; } = new List<ChannelTarget>();
     }
 
     public class ChannelTarget
