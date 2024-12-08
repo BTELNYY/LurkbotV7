@@ -13,18 +13,18 @@ namespace LurkbotV7.Modules
 {
     public class CustomInteractionModuleBase<T> : InteractionModuleBase<SocketInteractionContext> where T : ModuleConfiguration
     {
-        protected virtual Task RespondWithExceptionAsync(Exception ex, bool hidden = false)
+        protected virtual Task RespondWithExceptionAsync(Exception ex, bool ephemeral = false)
         {
             EmbedBuilder builder = new EmbedBuilder();
             builder.WithColor(Color.Red);
             builder.WithCurrentTimestamp();
             builder.WithTitle("An Exception Occured");
             builder.WithDescription($"```{ex.ToString()}```");
-            RespondAsync(embed: builder.Build(), ephemeral: hidden);
+            RespondAsync(embed: builder.Build(), ephemeral: ephemeral);
             return Task.CompletedTask;
         }
 
-        protected virtual Task RespondWithErrorAsync(string error, string title = "Error", bool hidden = false)
+        protected virtual Task RespondWithErrorAsync(string error, string title = "Error", bool ephemeral = false)
         {
             EmbedBuilder builder = new EmbedBuilder();
             builder.WithColor(Color.Red);
@@ -34,11 +34,11 @@ namespace LurkbotV7.Modules
             {
                 builder.WithDescription($"`{error}`");
             }
-            RespondAsync(embed: builder.Build(), ephemeral: hidden);
+            RespondAsync(embed: builder.Build(), ephemeral: ephemeral);
             return Task.CompletedTask;
         }
 
-        protected virtual Task RespondWithSuccesAsync(string success, string title = "Success", bool hidden = false)
+        protected virtual Task RespondWithSuccesAsync(string success, string title = "Success", bool ephemeral = false)
         {
             EmbedBuilder builder = new EmbedBuilder();
             builder.WithColor(Color.Green);
@@ -48,7 +48,7 @@ namespace LurkbotV7.Modules
             {
                 builder.WithDescription($"`{success}`");
             }
-            RespondAsync(embed: builder.Build(), ephemeral: hidden);
+            RespondAsync(embed: builder.Build(), ephemeral: ephemeral);
             return Task.CompletedTask;
         }
 

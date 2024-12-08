@@ -22,15 +22,32 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteMessageAuditLog(IMessage message)
         {
+            DeletionModal modal = new DeletionModal();
+            modal.MessageID = message.Id.ToString();
+            await Context.Interaction.RespondWithModalAsync<DeletionModal>("deletion_confirmation", modal);
+        }
+
+        public class DeletionModal : IModal
+        {
+            public string Title => "Delete Confirmation";
+
+            [InputLabel("Message ID")]
+            [ModalTextInput("messageid")]
+            public string MessageID { get; set; }
+
+            [InputLabel("Reason for deletion")]
+            [ModalTextInput("reason", initValue: "None")]
+            public string Reason { get; set; } 
+        }
+
+        [ModalInteraction("deletion_confirmation")]
+        public async Task ProcessDelete(DeletionModal modal)
+        {
+            IMessage message = Context.Channel.GetMessageAsync(ulong.Parse(modal.MessageID)).Result;
             EmbedBuilder eb = new EmbedBuilder();
             if (Context.Channel is not SocketGuildChannel channel)
             {
-                RespondWithErrorAsync("This command can only be ran in a guild.").RunSynchronously();
-                return;
-            }
-            if(message is not SocketMessage socketMessage)
-            {
-                RespondWithErrorAsync("Failed to convert IMessage into SocketMessage.").RunSynchronously();
+                await RespondAsync("This command can only be ran in a guild.");
                 return;
             }
             eb.WithTitle("Message was deleted");
@@ -43,11 +60,13 @@ namespace LurkbotV7.Modules
             eb.AddField("Channel", "<#" + channel.Id + ">");
             string content = string.IsNullOrEmpty(message.Content) ? "<No Content, likely an embed>" : message.Content;
             eb.AddField("Content", content);
+            eb.AddField("Reason", modal.Reason);
+            eb.AddField("Message Author", message.Author.Mention);
             eb.WithAuthor(Context.User);
             Embed[] embeds = new Embed[1 + message.Embeds.Count + message.Attachments.Count];
             embeds[0] = eb.Build();
             int counter = 1;
-            foreach(Embed embed in message.Embeds)
+            foreach (Embed embed in message.Embeds)
             {
                 EmbedBuilder builder = new EmbedBuilder();
                 builder.WithUrl(embed.Url);
@@ -56,36 +75,12 @@ namespace LurkbotV7.Modules
                 embeds[counter] = builder.Build();
                 counter++;
             }
-            //List<FileAttachment> attachmentsToUpload = new();
-            //foreach(IAttachment attachment in message.Attachments)
-            //{
-            //    FileAttachment attach = new FileAttachment(attachment.DownloadAttachment());
-            //    attachmentsToUpload.Add(attach);
-            //}
-            await socketMessage.DeleteAsync().ConfigureAwait(true);
-            await RespondWithSuccesAsync("Done.", hidden: true).ConfigureAwait(true);
-            await SendAuditLog(embeds).ConfigureAwait(false);
-            //foreach (ChannelTarget target in Config.AuditLogTargets)
-            //{
-            //    SocketGuild targetGuild = Program.Client.GetGuild(target.ServerID);
-            //    if (targetGuild == null)
-            //    {
-            //        Log.Error($"Invalid Guild Target in ModerationUtils. ID: {target.ServerID}");
-            //        continue;
-            //    }
-            //    SocketGuildChannel targetChannel = targetGuild.GetChannel(target.ChannelID);
-            //    if (targetGuild == null)
-            //    {
-            //        Log.Error($"Invalid Channel Target in ModerationUtils. ID: {target.ChannelID}, Server: {targetGuild.Name}");
-            //        continue;
-            //    }
-            //    if (targetChannel is not SocketTextChannel targetTextChannel)
-            //    {
-            //        Log.Error($"Invalid Channel Target in ModerationUtils. Not a text channel. Name: {targetChannel.Name}, Server: {targetGuild.Name}");
-            //        continue;
-            //    }
-            //    await targetTextChannel.SendFilesAsync(attachmentsToUpload).ConfigureAwait(true);
-            //}
+            //wtf kind of retarded ass logic is this
+            //If RespondAsync() is not called before the other methods it just never fires?
+            //???
+            await RespondWithSuccesAsync("Done", ephemeral: true);
+            await message.DeleteAsync();
+            await SendAuditLog(embeds);
         }
 
         public override void OnModuleBuilding(InteractionService commandService, ModuleInfo module)
