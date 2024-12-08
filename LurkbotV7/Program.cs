@@ -120,7 +120,9 @@ Version: {Version}
         {
             GatewayIntents = GatewayIntents.All,
             MessageCacheSize = 50,
+#if DEBUG
             LogLevel = LogSeverity.Debug,
+#endif
         };
         Client = new(config);
         InteractionServiceConfig interactionServiceConfig = new()

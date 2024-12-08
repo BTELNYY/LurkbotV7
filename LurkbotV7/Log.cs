@@ -53,7 +53,7 @@ namespace LurkbotV7
             Console.ForegroundColor = ConsoleColor.Green;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" SUCCESS]: " + msg);
@@ -74,7 +74,7 @@ namespace LurkbotV7
             Console.ForegroundColor = ConsoleColor.Red;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine($"[" + time + $" ERROR]: " + msg);
@@ -95,7 +95,7 @@ namespace LurkbotV7
             Console.ForegroundColor = ConsoleColor.Red;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" FATAL ERROR]: " + msg);
@@ -115,7 +115,7 @@ namespace LurkbotV7
             Console.ForegroundColor = ConsoleColor.Yellow;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" WARNING]: " + msg);
@@ -135,7 +135,7 @@ namespace LurkbotV7
             Console.ForegroundColor = ConsoleColor.White;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" INFO]: " + msg);
@@ -158,7 +158,7 @@ return;
             Console.ForegroundColor = ConsoleColor.Gray;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" DEBUG]: " + msg);
@@ -178,7 +178,7 @@ return;
             Console.ForegroundColor = ConsoleColor.Gray;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" VERBOSE]: " + msg);
@@ -198,7 +198,7 @@ return;
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
-            string file = Program.Config.LogPath + date + ".log";
+            string file = Path.Combine(Program.Config.LogPath, date + ".log");
             if (Program.Config.ShowLogsInConsole)
             {
                 Console.WriteLine("[" + time + $" CRITICAL]: " + msg);
