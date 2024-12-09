@@ -46,7 +46,7 @@ namespace LurkbotV7.Modules
             }
             EmbedBuilder builder = GetAuditEmbedTemplate(Context.User, Context.Guild);
             LockedChannel lockedChannel = Channels.FirstOrDefault(x => x.ChannelID == textChannel.Id && x.ServerID == Context.Guild.Id);
-            await RespondWithSuccesAsync("Done.  ", ephemeral: true);
+            await DeferAsync(ephemeral: true);
             if(lockedChannel != default(LockedChannel))
             {
                 foreach(Overwrite overwrite in lockedChannel.Overwrites)
@@ -128,6 +128,7 @@ namespace LurkbotV7.Modules
                 builder.WithColor(Color.Green);
                 await SendAuditLog(builder.Build());
             }
+            await FollowupAsync("Done", ephemeral: true);
         }
 
         [MessageCommand("Delete and Audit")]
