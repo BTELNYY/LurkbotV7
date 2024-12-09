@@ -145,11 +145,9 @@ namespace LurkbotV7.Modules
                         builder.AddField("Reason", audit.Reason.DiscordValidateReason());
                         builder.AddField("Until", new TimestampTag(memberUpdateData.After.TimedOutUntil.Value.DateTime, TimestampTagStyles.Relative));
                     }
-                    else if (memberUpdateData.After.TimedOutUntil.HasValue && memberUpdateData.After.TimedOutUntil.Value.DateTime.ToUniversalTime() < DateTime.Now.ToUniversalTime())
+                    else
                     {
-                        builder.WithColor(Color.Green);
-                        builder.AddField("Update Action", "Timeout Expired");
-                        builder.AddField("Target", memberUpdateData.Target.DownloadAsync().Result.Mention);
+                        return Task.CompletedTask;
                     }
                     break;
                 default:
