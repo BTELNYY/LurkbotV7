@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using System.Net;
 using System.Reflection.Metadata.Ecma335;
 
@@ -25,6 +26,11 @@ namespace LurkbotV7
                 File.WriteAllBytes(path, response.Content.ReadAsByteArrayAsync().Result);
                 return path;
             }
+        }
+
+        public static string GetMention(this IChannel channel)
+        {
+            return "<#" + channel.Id + ">";
         }
     }
 }

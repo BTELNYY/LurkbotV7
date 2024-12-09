@@ -34,12 +34,17 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(GuildPermission.ManageChannels)]
         public async Task LockdownChannel(string reason = null)
         {
+            if(string.IsNullOrWhiteSpace(reason) || string.IsNullOrEmpty(reason))
+            {
+                reason = "No reason given.";
+            }
             IChannel channel = Context.Channel;
             if(channel is not SocketTextChannel textChannel)
             {
                 await RespondWithErrorAsync("Channel is not a text channel and therefore is not supported.", ephemeral: true);
                 return;
             }
+            EmbedBuilder builder = GetAuditEmbedTemplate(Context.User, Context.Guild);
             LockedChannel lockedChannel = Channels.FirstOrDefault(x => x.ChannelID == textChannel.Id && x.ServerID == Context.Guild.Id);
             await RespondWithSuccesAsync("Done.  ", ephemeral: true);
             if(lockedChannel != default(LockedChannel))
@@ -72,6 +77,10 @@ namespace LurkbotV7.Modules
                 }
                 Channels.Remove(lockedChannel);
                 await textChannel.SendMessageAsync(Config.LockdownReleasedMessage);
+                builder.AddField("Action", "Lockdown Channel");
+                builder.AddField("Channel", Context.Channel.GetMention());
+                builder.WithColor(Color.Red);
+                await SendAuditLog(builder.Build());
             }
             else
             {
@@ -113,7 +122,11 @@ namespace LurkbotV7.Modules
                 OverwritePermissions permissions = new OverwritePermissions(sendMessages: PermValue.Deny, attachFiles: PermValue.Deny, embedLinks: PermValue.Deny, addReactions: PermValue.Deny);
                 await textChannel.AddPermissionOverwriteAsync(defaultRole, permissions);
                 Channels.Add(lockedChannelCreated);
-                await textChannel.SendMessageAsync(Config.LockdownMessage);
+                await textChannel.SendMessageAsync(Config.LockdownMessage + $"\nReason: {reason}");
+                builder.AddField("Action", "Unlock Channel");
+                builder.AddField("Channel", Context.Channel.GetMention());
+                builder.WithColor(Color.Green);
+                await SendAuditLog(builder.Build());
             }
         }
 
@@ -206,6 +219,18 @@ namespace LurkbotV7.Modules
             eb.AddField("Server", guild.Name);
             eb.AddField("Action", audit.Action);
             eb.WithAuthor(audit.User);
+            return eb;
+        }
+
+        private EmbedBuilder GetAuditEmbedTemplate(SocketUser author, SocketGuild guild)
+        {
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.WithTitle("Audit Log Created");
+            eb.WithColor(Color.LighterGrey);
+            eb.WithCurrentTimestamp();
+            eb.AddField("Created", new TimestampTag(DateTime.UtcNow, TimestampTagStyles.Relative));
+            eb.AddField("Server", guild.Name);
+            eb.WithAuthor(author);
             return eb;
         }
 
