@@ -137,23 +137,34 @@ Version: {Version}
         InteractionServices = new InteractionService(Client, interactionServiceConfig);
         Client.SlashCommandExecuted += async (x) =>
         {
-            //Log.Debug($"Command execute. Command: {x.CommandName}");
             var ctx = new SocketInteractionContext(Client, x);
-            await InteractionServices.ExecuteCommandAsync(ctx, Services);
+            await InvokeCommand(ctx, Services);
         };
         Client.MessageCommandExecuted += async(x) =>
         {
             var ctx = new SocketInteractionContext(Client, x);
-            await InteractionServices.ExecuteCommandAsync(ctx, Services);
+            await InvokeCommand(ctx, Services);
         };
         Client.ModalSubmitted += async (x) =>
         {
             var ctx = new SocketInteractionContext(Client, x);
-            await InteractionServices.ExecuteCommandAsync(ctx, Services);
+            await InvokeCommand(ctx, Services);
         };
         await Client.StartAsync();
         await Client.LoginAsync(TokenType.Bot, Config.BotToken);
         await Task.Delay(-1);
+    }
+
+    private async Task InvokeCommand(SocketInteractionContext context, IServiceProvider serviceProvider)
+    {
+        try
+        {
+            await InteractionServices.ExecuteCommandAsync(context, Services);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.ToString());
+        }
     }
 
     private static IServiceProvider ConfigureServices()
