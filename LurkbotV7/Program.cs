@@ -179,7 +179,12 @@ Version: {Version}
             Log.Info("Delete Commands!");
             foreach (var cmd in await Client.GetGlobalApplicationCommandsAsync())
             {
-                Log.Info($"Delete: {cmd.Name}");
+                Log.Info($"Delete Global: {cmd.Name}");
+                await cmd.DeleteAsync();
+            }
+            foreach (var cmd in Client.Guilds.Select(x => x.GetApplicationCommandsAsync().Result).SelectMany(x => x).ToList())
+            {
+                Log.Info($"Delete Application: {cmd.Name}, Guild: {cmd.Guild.Name}");
                 await cmd.DeleteAsync();
             }
             Environment.Exit(0);

@@ -7,8 +7,10 @@ using LurkbotV7.Attributes;
 using LurkbotV7.Config;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +19,104 @@ namespace LurkbotV7.Modules
     [Module]
     public class ModerationUtils : CustomInteractionModuleBase<ModerationUtilsConfig>
     {
+        public class LockedChannel
+        {
+            public ulong ChannelID = 0;
+            public ulong ServerID = 0;
+            public List<Overwrite> Overwrites = new List<Overwrite>();
+        }
+
+        public List<LockedChannel> Channels = new List<LockedChannel>();
+
+
+        [SlashCommand("lockdown", "Locks the current channel", runMode: RunMode.Async)]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.ManageChannels)]
+        public async Task LockdownChannel(string reason = null)
+        {
+            IChannel channel = Context.Channel;
+            if(channel is not SocketTextChannel textChannel)
+            {
+                await RespondWithErrorAsync("Channel is not a text channel and therefore is not supported.", ephemeral: true);
+                return;
+            }
+            LockedChannel lockedChannel = Channels.FirstOrDefault(x => x.ChannelID == textChannel.Id && x.ServerID == Context.Guild.Id);
+            await RespondWithSuccesAsync("Done.  ", ephemeral: true);
+            if(lockedChannel != default(LockedChannel))
+            {
+                foreach(Overwrite overwrite in lockedChannel.Overwrites)
+                {
+                    if (overwrite.Permissions.ManageChannel == PermValue.Allow)
+                    {
+                        continue;
+                    }
+                    if (overwrite.TargetType == PermissionTarget.Role)
+                    {
+                        IRole role = Program.Client.GetGuild(lockedChannel.ServerID)?.GetRole(overwrite.TargetId);
+                        if (role == default(IRole))
+                        {
+                            Log.Warning($"Can't find role {overwrite.TargetId}!");
+                            continue;
+                        }
+                        await textChannel.AddPermissionOverwriteAsync(role, overwrite.Permissions);
+                    }
+                    else
+                    {
+                        IUser user = Program.Client.GetGuild(lockedChannel.ServerID)?.GetUser(overwrite.TargetId);
+                        if (user == default(IUser))
+                        {
+                            continue;
+                        }
+                        await textChannel.AddPermissionOverwriteAsync(user, overwrite.Permissions);
+                    }
+                }
+                Channels.Remove(lockedChannel);
+                await textChannel.SendMessageAsync(Config.LockdownReleasedMessage);
+            }
+            else
+            {
+                LockedChannel lockedChannelCreated = new LockedChannel();
+                lockedChannelCreated.ServerID = textChannel.Guild.Id;
+                lockedChannelCreated.ChannelID = textChannel.Id;
+                foreach(Overwrite overwrite in textChannel.PermissionOverwrites)
+                {
+                    if(overwrite.Permissions.ManageChannel == PermValue.Allow)
+                    {
+                        continue;
+                    }
+                    lockedChannelCreated.Overwrites.Add(overwrite);
+                    if(overwrite.TargetType == PermissionTarget.Role)
+                    {
+                        IRole role = Program.Client.GetGuild(lockedChannel.ServerID)?.GetRole(overwrite.TargetId);
+                        if(role == default(IRole))
+                        {
+                            continue;
+                        }
+                        await textChannel.RemovePermissionOverwriteAsync(role);
+                    }
+                    else
+                    {
+                        IUser user = Program.Client.GetGuild(lockedChannel.ServerID)?.GetUser(overwrite.TargetId);
+                        if(user == default(IUser))
+                        {
+                            continue;
+                        }
+                        await textChannel.RemovePermissionOverwriteAsync(user);
+                    }
+                }
+                SocketRole defaultRole = Program.Client.GetGuild(lockedChannel.ServerID)?.EveryoneRole;
+                if(defaultRole == default(SocketRole))
+                {
+                    await RespondWithErrorAsync("Command failed: defaultRole couldn't be found.");
+                    return;
+                }
+                OverwritePermissions permissions = new OverwritePermissions(sendMessages: PermValue.Deny, attachFiles: PermValue.Deny, embedLinks: PermValue.Deny, addReactions: PermValue.Deny);
+                await textChannel.AddPermissionOverwriteAsync(defaultRole, permissions);
+                Channels.Add(lockedChannelCreated);
+                await textChannel.SendMessageAsync(Config.LockdownMessage);
+            }
+        }
+
         [MessageCommand("Delete and Audit")]
         [RequireContext(ContextType.Guild)]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
@@ -207,5 +307,9 @@ namespace LurkbotV7.Modules
         {
             653788451380002817
         };
+
+        public string LockdownMessage { get; set; } = "This channel has been locked down.";
+
+        public string LockdownReleasedMessage { get; set; } = "This channel has been unlocked.";
     }
 }
