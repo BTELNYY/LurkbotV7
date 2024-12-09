@@ -122,6 +122,8 @@ Version: {Version}
             MessageCacheSize = 50,
 #if DEBUG
             LogLevel = LogSeverity.Debug,
+#else
+            LogLevel = LogSeverity.Info,
 #endif
         };
         Client = new(config);
