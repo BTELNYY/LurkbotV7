@@ -8,18 +8,100 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using KoboldSharp;
+using System.ComponentModel;
+using Discord.Rest;
 
 namespace LurkbotV7.Modules
 {
     [Module]
     public class FunnyAIModule : CustomInteractionModuleBase<FunnyAIModuleConfig>
     {
+        public static KoboldClient AIClient { get; set; } = null;
+
         public override void OnModuleBuilding(InteractionService commandService, ModuleInfo module)
         {
             base.OnModuleBuilding(commandService, module);
+            Program.Client.MessageReceived += Client_MessageReceived;
+            if(AIClient == null)
+            {
+                AIClient = new KoboldClient(Config.Url);
+            }
         }
 
-        static bool _aiState = false;
+        private async Task Client_MessageReceived(SocketMessage message)
+        {
+            try
+            {
+                if(message.Author.Id == Program.Client.CurrentUser.Id)
+                {
+                    return;
+                }
+                if (message.Channel is not SocketGuildChannel guildChannel)
+                {
+                    return;
+                }
+                if (message.Channel is not SocketTextChannel textChannel)
+                {
+                    return;
+                }
+                if (!_aiState)
+                {
+                    await textChannel.SendMessageAsync("Not enabled");
+                    return;
+                }
+                if (Config.UserBlacklist.Contains(message.Author.Id))
+                {
+                    await textChannel.SendMessageAsync(text: "Access is Denied.", messageReference: new MessageReference(message.Id, guildChannel.Id, guildChannel.Guild.Id));
+                    return;
+                }
+                _ = Task.Run(async () =>
+                {
+                    List<IMessage> messages = message.GetMessageTree();
+                    if(messages.Count > 0)
+                    {
+                        if (!messages[0].MentionedUserIds.Contains(Program.Client.CurrentUser.Id))
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if(!message.MentionedUsers.Select(x => x.Id).Contains(Program.Client.CurrentUser.Id))
+                        {
+                            return;
+                        }
+                    }
+                    IDisposable typing = textChannel.EnterTypingState();
+                    string memoryGenerated = Config.Memory + "\n";
+                    for(int i = 0; i < messages.Count - 1; i++) {
+                    {
+                        IMessage msg = messages[i];
+                        string content = string.IsNullOrEmpty(msg.CleanContent.StripMentions()) ? "[Blank Message]" : msg.CleanContent.StripMentions();
+                        string memline = $"{msg.Author.Username}: {content}\n";
+                        memoryGenerated += memline;
+                    }
+                    string newPrompt = string.IsNullOrEmpty(message.CleanContent.StripMentions()) ? "[Blank Message]" : message.CleanContent.StripMentions();
+                    //await textChannel.SendMessageAsync($"Prompt: {newPrompt}\nMemory: ```{memoryGenerated}```\nMessage Tree: {messages.Count}");
+                    GenParams genParams = new GenParams(prompt: newPrompt, memory: memoryGenerated, maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature);
+                    ModelOutput output = await AIClient.Generate(genParams);
+                    string sResult = output.Results[0].Text;
+                    if (string.IsNullOrEmpty(output.Results[0].Text))
+                    {
+                        sResult = "[Blank Output]";
+                    }
+                    typing.Dispose();
+                    await textChannel.SendMessageAsync(text: output.Results[0].Text, messageReference: new MessageReference(message.Id, guildChannel.Id, guildChannel.Guild.Id));
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+
+        static bool _aiState = true;
 
         [SlashCommand("aisetstate", "Sets the AI state", runMode: RunMode.Async)]
         [RequireContext(ContextType.Guild)]
@@ -67,7 +149,7 @@ namespace LurkbotV7.Modules
     {
         public override string FileName => "AIConfig";
 
-        public string Url { get; set; } = "";
+        public string Url { get; set; } = "http://localhost:5001";
 
         public string Memory { get; set; } = "";
 

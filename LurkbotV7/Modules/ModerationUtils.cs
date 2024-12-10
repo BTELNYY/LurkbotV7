@@ -167,37 +167,66 @@ namespace LurkbotV7.Modules
                 await RespondAsync("This command can only be ran in a guild.");
                 return;
             }
-            eb.WithTitle("Message was deleted");
-            eb.WithColor(Color.LightOrange);
-            eb.WithDescription("Since this was done via the application command, it is counted as an audit. **Deleting through the right click context menu will not produce this message.** \nDeleted content is attached below.");
-            eb.WithCurrentTimestamp();
-            eb.AddField("Created", new TimestampTag(DateTime.Now, TimestampTagStyles.Relative));
-            eb.AddField("Server", channel.Guild.Name);
-            eb.AddField("Action", "Message Delete");
-            eb.AddField("Channel", "<#" + channel.Id + ">");
-            string content = string.IsNullOrEmpty(message.Content) ? "<No Content, likely an embed>" : message.Content;
-            eb.AddField("Content", content);
-            eb.AddField("Reason", modal.Reason);
-            eb.AddField("Message Author", message.Author.Mention);
-            eb.WithAuthor(Context.User);
-            Embed[] embeds = new Embed[1 + message.Embeds.Count + message.Attachments.Count];
-            embeds[0] = eb.Build();
-            int counter = 1;
-            foreach (Embed embed in message.Embeds)
-            {
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.WithUrl(embed.Url);
-                builder.WithColor(Color.LightOrange);
-                builder.WithAuthor(message.Author);
-                embeds[counter] = builder.Build();
-                counter++;
-            }
             //wtf kind of retarded ass logic is this
             //If RespondAsync() is not called before the other methods it just never fires?
             //???
             await RespondWithSuccesAsync("Done", ephemeral: true);
-            await message.DeleteAsync();
-            await SendAuditLog(embeds);
+            await Task.Run(async () =>
+            {
+                eb.WithTitle("Message was deleted");
+                eb.WithColor(Color.LightOrange);
+                eb.WithDescription("Since this was done via the application command, it is counted as an audit. **Deleting through the right click context menu will not produce this message.** \nDeleted content is attached below.");
+                eb.WithCurrentTimestamp();
+                eb.AddField("Created", new TimestampTag(DateTime.Now, TimestampTagStyles.Relative));
+                eb.AddField("Server", channel.Guild.Name);
+                eb.AddField("Action", "Message Delete");
+                eb.AddField("Channel", "<#" + channel.Id + ">");
+                string content = string.IsNullOrEmpty(message.Content) ? "<No Content, likely an embed>" : message.Content;
+                eb.AddField("Content", content);
+                eb.AddField("Reason", modal.Reason);
+                eb.AddField("Message Author", message.Author.Mention);
+                eb.WithAuthor(Context.User);
+                Embed[] embeds = new Embed[1 + message.Embeds.Count + message.Attachments.Count];
+                embeds[0] = eb.Build();
+                int counter = 1;
+                foreach (Embed embed in message.Embeds)
+                {
+                    EmbedBuilder builder = new EmbedBuilder();
+                    switch (embed.Type)
+                    {
+                        case EmbedType.Video:
+                            if (embed.Video.HasValue)
+                            {
+                                builder.WithUrl(embed.Video.Value.Url);
+                            }
+                            break;
+                        case EmbedType.Gifv:
+                            if (embed.Image.HasValue)
+                            {
+                                builder.WithUrl(embed.Image.Value.Url);
+                            }
+                            break;
+                        case EmbedType.Image:
+                            if (embed.Image.HasValue)
+                            {
+                                builder.WithUrl(embed.Image.Value.Url);
+                            }
+                            break;
+                        case EmbedType.Link:
+                            builder.WithUrl(embed.Url);
+                            break;
+                        default:
+                            builder.AddField("Emebed Type", embed.Type.ToString());
+                            break;
+                    }
+                    builder.WithColor(Color.LightOrange);
+                    builder.WithAuthor(message.Author);
+                    embeds[counter] = builder.Build();
+                    counter++;
+                }
+                await message.DeleteAsync();
+                await SendAuditLog(embeds);
+            });
         }
 
         public override void OnModuleBuilding(InteractionService commandService, ModuleInfo module)

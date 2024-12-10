@@ -159,7 +159,11 @@ Version: {Version}
     {
         try
         {
-            await InteractionServices.ExecuteCommandAsync(context, Services);
+            var result = await InteractionServices.ExecuteCommandAsync(context, Services);
+            if(!result.IsSuccess)
+            {
+                Log.Error("Error in command!\n" + result.ErrorReason);
+            }
         }
         catch (Exception ex)
         {
