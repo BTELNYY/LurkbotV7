@@ -90,8 +90,6 @@ namespace LurkbotV7
         {
             messageString = Regex.Replace(messageString, "<@!*&*[0-9A-Z#]+>", "");
             messageString = Regex.Replace(messageString, "@!*&*[0-9A-Z#]+", "");
-            messageString = Regex.Replace(messageString, "<#[0-9]+>", "");
-            messageString = Regex.Replace(messageString, "^[#@A-Za-z0-9]\\w+", "");
             messageString = messageString.Trim();
             return messageString;
         }

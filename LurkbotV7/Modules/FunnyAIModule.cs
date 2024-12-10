@@ -74,24 +74,26 @@ namespace LurkbotV7.Modules
                     }
                     IDisposable typing = textChannel.EnterTypingState();
                     string memoryGenerated = Config.Memory + "\n";
-                    for(int i = 0; i < messages.Count - 1; i++) {
+                    string magicString = $"@{Program.Client.CurrentUser.Username}#{Program.Client.CurrentUser.Discriminator}";
+                    for(int i = 0; i < messages.Count; i++)
                     {
                         IMessage msg = messages[i];
-                        string content = string.IsNullOrEmpty(msg.CleanContent.StripMentions()) ? "[Blank Message]" : msg.CleanContent.StripMentions();
+                        string content = string.IsNullOrEmpty(msg.Content.StripMentions().Replace(magicString, "")) ? "[Blank Message]" : msg.Content.Replace(magicString, "");
                         string memline = $"{msg.Author.Username}: {content}\n";
                         memoryGenerated += memline;
                     }
-                    string newPrompt = string.IsNullOrEmpty(message.CleanContent.StripMentions()) ? "[Blank Message]" : message.CleanContent.StripMentions();
-                    //await textChannel.SendMessageAsync($"Prompt: {newPrompt}\nMemory: ```{memoryGenerated}```\nMessage Tree: {messages.Count}");
-                    GenParams genParams = new GenParams(prompt: newPrompt, memory: memoryGenerated, maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature);
+                    //cheap hack
+                    string newPrompt = string.IsNullOrEmpty(message.Content) ? "[Blank Message]" : $"{message.Author.Username}: " + message.Content.Replace(magicString, "").StripMentions().Trim();
+                    //Log.Info($"Prompt: {newPrompt}\nMemory: ```{memoryGenerated}```\nMessage Tree: {messages.Count}");
+                    GenParams genParams = new GenParams(prompt: newPrompt, memory: memoryGenerated = memoryGenerated.Replace("{botName}", Program.Client.CurrentUser.Username), maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature);
                     ModelOutput output = await AIClient.Generate(genParams);
                     string sResult = output.Results[0].Text;
-                    if (string.IsNullOrEmpty(output.Results[0].Text))
+                    if (string.IsNullOrWhiteSpace(output.Results[0].Text))
                     {
                         sResult = "[Blank Output]";
                     }
                     typing.Dispose();
-                    await textChannel.SendMessageAsync(text: output.Results[0].Text, messageReference: new MessageReference(message.Id, guildChannel.Id, guildChannel.Guild.Id));
+                    await textChannel.SendMessageAsync(text: output.Results[0].Text.Replace($"{Program.Client.CurrentUser.Username}: ", ""), messageReference: new MessageReference(message.Id, guildChannel.Id, guildChannel.Guild.Id));
                 });
             }
             catch (Exception ex)
@@ -151,9 +153,9 @@ namespace LurkbotV7.Modules
 
         public string Url { get; set; } = "http://localhost:5001";
 
-        public string Memory { get; set; } = "";
+        public string Memory { get; set; } = "[Yyou are {botName}.\nYou may not pretend to be the users.]";
 
-        public int MaxGenerationSize { get; set; } = 128;
+        public int MaxGenerationSize { get; set; } = 100;
 
         public int MaxContextSize { get; set; } = 2048;
 
