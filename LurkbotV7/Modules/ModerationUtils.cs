@@ -171,7 +171,7 @@ namespace LurkbotV7.Modules
             //If RespondAsync() is not called before the other methods it just never fires?
             //???
             await RespondWithSuccesAsync("Done", ephemeral: true);
-            await Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 eb.WithTitle("Message was deleted");
                 eb.WithColor(Color.LightOrange);
