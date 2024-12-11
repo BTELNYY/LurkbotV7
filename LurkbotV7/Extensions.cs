@@ -88,8 +88,8 @@ namespace LurkbotV7
 
         public static string StripMentions(this string messageString)
         {
-            messageString = Regex.Replace(messageString, "<@!*&*[0-9A-Z#]+>", "");
-            messageString = Regex.Replace(messageString, "@!*&*[0-9A-Z#]+", "");
+            messageString = Regex.Replace(messageString, "<#[0-9]+>", "");
+            messageString = Regex.Replace(messageString, "<@!*&*[0-9]+>", "");
             messageString = messageString.Trim();
             return messageString;
         }

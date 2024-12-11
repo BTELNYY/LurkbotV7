@@ -78,17 +78,17 @@ namespace LurkbotV7.Modules
                     for(int i = 0; i < messages.Count; i++)
                     {
                         IMessage msg = messages[i];
-                        string content = string.IsNullOrEmpty(msg.Content.StripMentions().Replace(magicString, "")) ? "[Blank Message]" : msg.Content.Replace(magicString, "");
+                        string content = string.IsNullOrEmpty(msg.Content.StripMentions().Replace(magicString, "").Trim()) ? "[Blank Message]" : msg.Content.Replace(magicString, "").StripMentions().Trim();
                         string memline = $"{msg.Author.Username}: {content}\n";
                         memoryGenerated += memline;
                     }
                     //cheap hack
                     string newPrompt = string.IsNullOrEmpty(message.Content) ? "[Blank Message]" : $"{message.Author.Username}: " + message.Content.Replace(magicString, "").StripMentions().Trim();
                     //Log.Info($"Prompt: {newPrompt}\nMemory: ```{memoryGenerated}```\nMessage Tree: {messages.Count}");
-                    GenParams genParams = new GenParams(prompt: newPrompt, memory: memoryGenerated = memoryGenerated.Replace("{botName}", Program.Client.CurrentUser.Username), maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature);
+                    GenParams genParams = new GenParams(prompt: newPrompt, memory: memoryGenerated = memoryGenerated.Replace("{botName}", Program.Client.CurrentUser.Username), maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature, stopSequence: messages.Select(x => x.Author.Username).Except(new List<string>() { Program.Client.CurrentUser.Username }).ToList());
                     ModelOutput output = await AIClient.Generate(genParams);
-                    string sResult = output.Results[0].Text;
-                    if (string.IsNullOrWhiteSpace(output.Results[0].Text))
+                    string sResult = string.Join('\n', output.Results.Select(x => x.Text));
+                    if (string.IsNullOrWhiteSpace(sResult))
                     {
                         sResult = "[Blank Output]";
                     }
@@ -153,7 +153,7 @@ namespace LurkbotV7.Modules
 
         public string Url { get; set; } = "http://localhost:5001";
 
-        public string Memory { get; set; } = "[Yyou are {botName}.\nYou may not pretend to be the users.]";
+        public string Memory { get; set; } = "[You are {botName}.]";
 
         public int MaxGenerationSize { get; set; } = 100;
 
