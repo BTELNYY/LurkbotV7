@@ -39,7 +39,7 @@ namespace LurkbotV7.Modules
                 reason = "No reason given.";
             }
             await RespondAsync("Done", ephemeral: true);
-            await Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 IChannel channel = Context.Channel;
                 if (channel is not SocketTextChannel textChannel)
@@ -47,6 +47,7 @@ namespace LurkbotV7.Modules
                     await RespondWithErrorAsync("Channel is not a text channel and therefore is not supported.", ephemeral: true);
                     return;
                 }
+                IDisposable typing = textChannel.EnterTypingState();
                 EmbedBuilder builder = GetAuditEmbedTemplate(Context.User, Context.Guild);
                 LockedChannel lockedChannel = Channels.FirstOrDefault(x => x.ChannelID == textChannel.Id && x.ServerID == Context.Guild.Id);
                 //await DeferAsync(ephemeral: true);
@@ -79,6 +80,7 @@ namespace LurkbotV7.Modules
                         }
                     }
                     Channels.Remove(lockedChannel);
+                    typing.Dispose();
                     await textChannel.SendMessageAsync(Config.LockdownReleasedMessage);
                     builder.AddField("Action", "Unlock Channel");
                     builder.AddField("Channel", Context.Channel.GetMention());
@@ -125,6 +127,7 @@ namespace LurkbotV7.Modules
                     OverwritePermissions permissions = new OverwritePermissions(sendMessages: PermValue.Deny, attachFiles: PermValue.Deny, embedLinks: PermValue.Deny, addReactions: PermValue.Deny);
                     await textChannel.AddPermissionOverwriteAsync(defaultRole, permissions);
                     Channels.Add(lockedChannelCreated);
+                    typing.Dispose();
                     await textChannel.SendMessageAsync(Config.LockdownMessage + $"\nReason: {reason}");
                     builder.AddField("Action", "Lock Channel");
                     builder.AddField("Channel", Context.Channel.GetMention());
