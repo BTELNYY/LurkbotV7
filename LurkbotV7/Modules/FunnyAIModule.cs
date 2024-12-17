@@ -103,7 +103,7 @@ namespace LurkbotV7.Modules
         }
 
 
-        static bool _aiState = true;
+        static bool _aiState = false;
 
         [SlashCommand("aisetstate", "Sets the AI state", runMode: RunMode.Async)]
         [RequireContext(ContextType.Guild)]

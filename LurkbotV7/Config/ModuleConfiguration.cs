@@ -17,7 +17,6 @@ namespace LurkbotV7.Config
             }
         }
 
-        [YamlIgnore]
         public virtual string FileName { get; set; } = "config";
     }
 }

@@ -6,7 +6,7 @@ using RestSharp;
 namespace LurkbotV7.Managers;
 public static class SLManager
 {
-    public static event Action ListRefreshed;
+    public static event Action<Response> ListRefreshed;
     public static event Action<List<Player>> PlayersJoinedEvent;
     public static event Action<List<Player>> PlayersLeftEvent;
 
@@ -197,11 +197,11 @@ public static class SLManager
         Players = data.Servers.Select(x => x.PlayersList).SelectMany(x => x).ToList();
         Response = data;
         Log.Debug("List Refresh complete, called event");
-        ListRefreshed?.Invoke();
+        ListRefreshed?.Invoke(Response);
         return;
     }
 
-    public static void PlayerChangeDetector()
+    public static void PlayerChangeDetector(Response response)
     {
         Log.Debug("Still alive: PlayerChangeDetector");
         LeftPlayers.Clear();
