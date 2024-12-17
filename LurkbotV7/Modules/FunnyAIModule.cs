@@ -47,7 +47,6 @@ namespace LurkbotV7.Modules
                 }
                 if (!_aiState)
                 {
-                    await textChannel.SendMessageAsync("Not enabled");
                     return;
                 }
                 if (Config.UserBlacklist.Contains(message.Author.Id))
