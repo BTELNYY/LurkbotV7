@@ -25,11 +25,11 @@ namespace LurkbotV7.Modules
                     string chosenMessage = "";
                     if (!response.Success)
                     {
-                        chosenMessage = "With Fire (Something broke)";
+                        chosenMessage = "Ping btelnyy because something is broken (bad)";
                     }
                     else if(!response.Servers.Any(x => x.PlayersList.Count() > 0))
                     {
-                        chosenMessage = "With Nobody (Empty Servers)";
+                        chosenMessage = "All servers are empty.";
                     }
                     else
                     {
