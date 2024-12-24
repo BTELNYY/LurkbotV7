@@ -81,7 +81,7 @@ public static class SLManager
                     builder.WithColor(Color.Green);
                     builder.AddField("Playercount", server.PlayersList.Length);
                     string desc = "```";
-                    desc += string.Join(",\n", server.PlayersList.Select(x => x.Nickname));
+                    desc += string.Join("\n", server.PlayersList.Select(x => x.Nickname));
                     desc = desc.Trim();
                     desc += "```";
                     builder.WithDescription(desc);
