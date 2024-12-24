@@ -25,11 +25,11 @@ namespace LurkbotV7.Modules
                     string chosenMessage = "";
                     if (!response.Success)
                     {
-                        chosenMessage = "With Fire (Something broke)";
+                        chosenMessage = "Ping btelnyy because something is broken (bad)";
                     }
                     else if(!response.Servers.Any(x => x.PlayersList.Count() > 0))
                     {
-                        chosenMessage = "With Nobody (Empty Servers)";
+                        chosenMessage = "All servers are empty.";
                     }
                     else
                     {
@@ -45,9 +45,9 @@ namespace LurkbotV7.Modules
                         }
                         Program.Config.IDToName.TryGetValue(chosenServer.ID, out string serverName);
                         serverName = serverName == string.Empty ? "(No Name)" : serverName;
-                        chosenMessage = $"With {players} people on {serverName}!";
+                        chosenMessage = $"{players}/30 playing on {serverName}!";
                     }
-                    Game game = new Game(chosenMessage);
+                    Game game = new CustomStatusGame(chosenMessage);
                     await Program.Client.SetActivityAsync(game);
                 });
             };
