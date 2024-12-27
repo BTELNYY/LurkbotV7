@@ -9,6 +9,8 @@ namespace LurkbotV7
 {
     public class Log
     {
+        public static object streamLock = new object();
+
         public static void Message(LogLevel level, string message)
         {
 #if !DEBUG
@@ -19,6 +21,12 @@ namespace LurkbotV7
 #endif
             switch (level)
             {
+                case LogLevel.Success:
+                    Success(message);
+                    break;
+                case LogLevel.Info:
+                    Info(message);
+                    break;
                 case LogLevel.Critical:
                     Critical(message);
                     break;
@@ -54,13 +62,17 @@ namespace LurkbotV7
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" SUCCESS]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" SUCCESS]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" SUCCESS]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () => 
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
 
@@ -75,13 +87,17 @@ namespace LurkbotV7
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = $"[" + time + $" ERROR]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine($"[" + time + $" ERROR]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" ERROR]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
             Debug("Error stack trace: \n" + trace.ToString());
         }
@@ -96,13 +112,17 @@ namespace LurkbotV7
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" FATAL ERROR]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" FATAL ERROR]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" FATAL ERROR]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
 
@@ -116,13 +136,17 @@ namespace LurkbotV7
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" WARNING]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" WARNING]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" WARNING]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
 
@@ -136,13 +160,17 @@ namespace LurkbotV7
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" INFO]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" INFO]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" INFO]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
 
@@ -159,13 +187,17 @@ return;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" DEBUG]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" DEBUG]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" DEBUG]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
 
@@ -179,13 +211,17 @@ return;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" VERBOSE]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" VERBOSE]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" VERBOSE]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
 
@@ -199,24 +235,29 @@ return;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
             string file = Path.Combine(Program.Config.LogPath, date + ".log");
+            string message = "[" + time + $" CRITICAL]: " + msg;
             if (Program.Config.ShowLogsInConsole)
             {
-                Console.WriteLine("[" + time + $" CRITICAL]: " + msg);
+                Console.WriteLine(message);
             }
-            StreamWriter sw = new StreamWriter(file, append: true);
-            sw.Write("[" + time + $" CRITICAL]: " + msg + "\n");
-            sw.Close();
+            _ = Task.Run(async () =>
+            {
+                StreamWriter sw = new StreamWriter(file, append: true);
+                await sw.WriteAsync(message);
+                sw.Close();
+            });
             Console.ResetColor();
         }
     }
 
     public enum LogLevel
     {
-        Critical,
-        Error,
-        Warning,
-        Info,
-        Verbose,
-        Debug,
+        Critical = 0,
+        Error = 1,
+        Warning = 2,
+        Info = 3,
+        Verbose = 4,
+        Debug = 5,
+        Success = 6,
     }
 }
