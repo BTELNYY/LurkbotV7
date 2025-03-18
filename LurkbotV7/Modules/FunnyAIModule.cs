@@ -1,16 +1,9 @@
-﻿using Discord.Interactions;
-using LurkbotV7.Attributes;
-using Discord;
-using LurkbotV7.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using KoboldSharp;
-using System.ComponentModel;
-using Discord.Rest;
+using LurkbotV7.Attributes;
+using LurkbotV7.Config;
 
 namespace LurkbotV7.Modules
 {
@@ -23,7 +16,7 @@ namespace LurkbotV7.Modules
         {
             base.OnModuleBuilding(commandService, module);
             Program.Client.MessageReceived += Client_MessageReceived;
-            if(AIClient == null)
+            if (AIClient == null)
             {
                 AIClient = new KoboldClient(Config.Url);
             }
@@ -33,7 +26,7 @@ namespace LurkbotV7.Modules
         {
             try
             {
-                if(message.Author.Id == Program.Client.CurrentUser.Id)
+                if (message.Author.Id == Program.Client.CurrentUser.Id)
                 {
                     return;
                 }
@@ -57,7 +50,7 @@ namespace LurkbotV7.Modules
                 _ = Task.Run(async () =>
                 {
                     List<IMessage> messages = message.GetMessageTree();
-                    if(messages.Count > 0)
+                    if (messages.Count > 0)
                     {
                         if (!messages[0].MentionedUserIds.Contains(Program.Client.CurrentUser.Id))
                         {
@@ -66,7 +59,7 @@ namespace LurkbotV7.Modules
                     }
                     else
                     {
-                        if(!message.MentionedUsers.Select(x => x.Id).Contains(Program.Client.CurrentUser.Id))
+                        if (!message.MentionedUsers.Select(x => x.Id).Contains(Program.Client.CurrentUser.Id))
                         {
                             return;
                         }
@@ -74,7 +67,7 @@ namespace LurkbotV7.Modules
                     IDisposable typing = textChannel.EnterTypingState();
                     string memoryGenerated = Config.Memory + "\n";
                     string magicString = $"@{Program.Client.CurrentUser.Username}#{Program.Client.CurrentUser.Discriminator}";
-                    for(int i = 0; i < messages.Count; i++)
+                    for (int i = 0; i < messages.Count; i++)
                     {
                         IMessage msg = messages[i];
                         string content = string.IsNullOrEmpty(msg.Content.StripMentions().Replace(magicString, "").Trim()) ? "[Blank Message]" : msg.Content.Replace(magicString, "").StripMentions().Trim();
@@ -109,7 +102,7 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SetAIState(bool state)
         {
-            if(_aiState == state)
+            if (_aiState == state)
             {
                 await RespondAsync($"No change, state is already `{state}`", ephemeral: true);
                 return;
@@ -123,17 +116,17 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task BlacklistUser(SocketUser user, bool state = true)
         {
-            if(Config.UserBlacklist.Contains(user.Id) && state)
+            if (Config.UserBlacklist.Contains(user.Id) && state)
             {
                 await RespondWithErrorAsync("That user is already blacklisted.", ephemeral: true);
             }
-            else if(Config.UserBlacklist.Contains(user.Id) && !state)
+            else if (Config.UserBlacklist.Contains(user.Id) && !state)
             {
                 Config.UserBlacklist.Remove(user.Id);
                 SaveConfig();
                 await RespondWithSuccesAsync("User has been removed from the blacklist.", ephemeral: true);
             }
-            else if(!Config.UserBlacklist.Contains(user.Id) && state)
+            else if (!Config.UserBlacklist.Contains(user.Id) && state)
             {
                 Config.UserBlacklist.Add(user.Id);
                 SaveConfig();

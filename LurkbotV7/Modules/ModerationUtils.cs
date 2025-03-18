@@ -1,18 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
-using Discord.Net.Converters;
-using Discord.Rest;
 using Discord.WebSocket;
 using LurkbotV7.Attributes;
 using LurkbotV7.Config;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reactive;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LurkbotV7.Modules
 {
@@ -34,7 +24,7 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(GuildPermission.ManageChannels)]
         public async Task LockdownChannel(string reason = null)
         {
-            if(string.IsNullOrWhiteSpace(reason) || string.IsNullOrEmpty(reason))
+            if (string.IsNullOrWhiteSpace(reason) || string.IsNullOrEmpty(reason))
             {
                 reason = "No reason given.";
             }
@@ -157,7 +147,7 @@ namespace LurkbotV7.Modules
 
             [InputLabel("Reason for deletion")]
             [ModalTextInput("reason", initValue: "None")]
-            public string Reason { get; set; } 
+            public string Reason { get; set; }
         }
 
         [ModalInteraction("deletion_confirmation")]
@@ -237,7 +227,7 @@ namespace LurkbotV7.Modules
             base.OnModuleBuilding(commandService, module);
             Program.Client.AuditLogCreated += (audit, guild) =>
             {
-                Task.Run(async () => 
+                Task.Run(async () =>
                 {
                     await AuditLog(audit, guild);
                 });
@@ -318,7 +308,7 @@ namespace LurkbotV7.Modules
             return Task.CompletedTask;
         }
 
-       
+
         public Task SendAuditLog(Embed embed)
         {
             return SendAuditLog(new Embed[] { embed });

@@ -56,7 +56,7 @@ public static class SLManager
     public static Embed[] GetEmbeds()
     {
         List<Embed> embeds = new List<Embed>();
-        if(Response.Servers == null)
+        if (Response.Servers == null)
         {
             EmbedBuilder builder = new EmbedBuilder();
             builder.WithCurrentTimestamp();
@@ -106,11 +106,11 @@ public static class SLManager
     {
         Log.Debug("Pulling data...");
         Log.Debug("Creating request...");
-        var request = new RestRequest(Program.Config.APIUrl.Replace("{id}", Program.Config.AccountID.ToString()).Replace("{key}", Program.Config.APIKey), Method.Get);
+        RestRequest request = new RestRequest(Program.Config.APIUrl.Replace("{id}", Program.Config.AccountID.ToString()).Replace("{key}", Program.Config.APIKey), Method.Get);
         Log.Debug("Fetching...");
-        var resp = client.ExecuteAsync(request);
+        Task<RestResponse> resp = client.ExecuteAsync(request);
         Log.Debug("Deserializing " + resp.Result.Content);
-        var data = JsonConvert.DeserializeObject<Response>(resp.Result.Content);
+        Response data = JsonConvert.DeserializeObject<Response>(resp.Result.Content);
         if (!data.Success)
         {
             Log.Fatal("Unable to fetch totalPlayerCount: " + data.Error);
@@ -266,23 +266,23 @@ public static class SLManager
 
     public static void UpdateEmbeds()
     {
-        foreach(ChannelTarget target in Program.Config.UpdateChannelTargets)
+        foreach (ChannelTarget target in Program.Config.UpdateChannelTargets)
         {
             SocketGuild guild = Program.Client.GetGuild(target.ServerID);
-            if(guild == null)
+            if (guild == null)
             {
                 Log.Error($"Guild {target.ServerID} is not found.");
                 continue;
             }
             SocketGuildChannel guildChannel = guild.GetChannel(target.ChannelID);
-            if(guildChannel is not SocketTextChannel channel)
+            if (guildChannel is not SocketTextChannel channel)
             {
                 Log.Error($"Channel {guildChannel.Name} in Guild {guild.Name}");
                 continue;
             }
             Embed[] embeds = GetEmbeds();
             //Log.Debug("Channel obtained");
-            var meses = channel.GetMessagesAsync().FlattenAsync().Result;
+            IEnumerable<IMessage> meses = channel.GetMessagesAsync().FlattenAsync().Result;
             //Log.Debug("Messages obtained");
             if (meses == null)
             {
@@ -291,7 +291,7 @@ public static class SLManager
                 continue;
             }
             //Log.Debug("Searching for messages from bot");
-            var botMes = meses.Where((message => message.Author.Id == Program.Client.CurrentUser.Id));
+            IEnumerable<IMessage> botMes = meses.Where((message => message.Author.Id == Program.Client.CurrentUser.Id));
             //Log.Debug("Getting first bot message");
             if (!botMes.Any())
             {
@@ -299,7 +299,7 @@ public static class SLManager
                 channel.SendMessageAsync(embeds: embeds);
                 continue;
             }
-            var messagetoEdit = botMes.First();
+            IMessage messagetoEdit = botMes.First();
             //Log.Debug("Checking dat shit");
             if (messagetoEdit == null)
             {
@@ -311,7 +311,7 @@ public static class SLManager
             {
                 // edit message
                 //Log.Debug("Edit message");
-                var mestoEdituser = messagetoEdit as IUserMessage;
+                IUserMessage mestoEdituser = messagetoEdit as IUserMessage;
                 if (mestoEdituser == null)
                 {
                     //Log.Fatal("not a IUserMessage");

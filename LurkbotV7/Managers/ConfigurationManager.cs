@@ -1,12 +1,5 @@
 ﻿using LurkbotV7.Config;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace LurkbotV7.Managers
 {
@@ -40,14 +33,14 @@ namespace LurkbotV7.Managers
         public static T GetConfiguration<T>() where T : ModuleConfiguration
         {
             T defaultVal = (T)Activator.CreateInstance(typeof(T));
-            if(!File.Exists(Path.Combine(CONFIGPATH, defaultVal.FileName + ".json")))
+            if (!File.Exists(Path.Combine(CONFIGPATH, defaultVal.FileName + ".json")))
             {
                 SaveConfiguration(defaultVal);
                 return defaultVal;
             }
             string text = File.ReadAllText(Path.Combine(CONFIGPATH, defaultVal.FileName + ".json"));
             T returnedValue = JsonConvert.DeserializeObject<T>(text);
-            if(returnedValue == default(T))
+            if (returnedValue == default(T))
             {
                 Log.Warning($"Deserialization failed for config file \"{defaultVal.FileName}\", default returned.");
                 return defaultVal;

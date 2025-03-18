@@ -3,11 +3,6 @@ using Discord.Commands;
 using Discord.Interactions;
 using LurkbotV7.Config;
 using LurkbotV7.Managers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LurkbotV7.Modules
 {
@@ -30,7 +25,7 @@ namespace LurkbotV7.Modules
             builder.WithColor(Color.Red);
             builder.WithCurrentTimestamp();
             builder.WithTitle(title);
-            if(!string.IsNullOrEmpty(error))
+            if (!string.IsNullOrEmpty(error))
             {
                 builder.WithDescription($"`{error}`");
             }
@@ -64,7 +59,7 @@ namespace LurkbotV7.Modules
         {
             get
             {
-                if(_config == default(T))
+                if (_config == default(T))
                 {
                     _config = ConfigurationManager.GetConfiguration<T>();
                 }

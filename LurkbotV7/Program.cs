@@ -1,18 +1,13 @@
-﻿using Discord.Commands;
+﻿using System.Reflection;
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Discord;
-using System.Diagnostics;
+using LurkbotV7.Attributes;
+using LurkbotV7.Config;
+using LurkbotV7.Managers;
+using Microsoft.Extensions.DependencyInjection;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Discord.Rest;
-using LurkbotV7.Managers;
-using System.Reflection;
-using LurkbotV7.Attributes;
-using Microsoft.Extensions.DependencyInjection;
-using LurkbotV7.Modules;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using LurkbotV7.Config;
 
 namespace LurkbotV7;
 
@@ -50,7 +45,7 @@ public class Program
 
     public static void SaveConfig()
     {
-        var builder = new SerializerBuilder()
+        ISerializer builder = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         string text = builder.Serialize(Config);
@@ -63,7 +58,7 @@ public class Program
 
     public static void LoadConfig()
     {
-        var builder = new DeserializerBuilder()
+        IDeserializer builder = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
         if (!File.Exists(ConfigPath))
@@ -74,8 +69,8 @@ public class Program
             return;
         }
         string text = File.ReadAllText(ConfigPath);
-        BotConfig config = (BotConfig)builder.Deserialize<BotConfig>(text);
-        if(config == null)
+        BotConfig config = builder.Deserialize<BotConfig>(text);
+        if (config == null)
         {
             Log.Error("Failure to load config: config is null.");
             Config = new BotConfig();
@@ -111,7 +106,7 @@ public class Program
                                                     """"
 Version: {Version}
 ");
-        if(args.Contains("--delete-commands"))
+        if (args.Contains("--delete-commands"))
         {
             DestoryCommands = true;
         }
@@ -128,7 +123,7 @@ Version: {Version}
         };
         Client = new(config);
         InteractionServiceConfig interactionServiceConfig = new()
-        { 
+        {
             //TODO, fill in.
         };
         Client.Log += ClientLog;
@@ -137,17 +132,17 @@ Version: {Version}
         InteractionServices = new InteractionService(Client, interactionServiceConfig);
         Client.SlashCommandExecuted += async (x) =>
         {
-            var ctx = new SocketInteractionContext(Client, x);
+            SocketInteractionContext ctx = new SocketInteractionContext(Client, x);
             await InvokeCommand(ctx, Services);
         };
-        Client.MessageCommandExecuted += async(x) =>
+        Client.MessageCommandExecuted += async (x) =>
         {
-            var ctx = new SocketInteractionContext(Client, x);
+            SocketInteractionContext ctx = new SocketInteractionContext(Client, x);
             await InvokeCommand(ctx, Services);
         };
         Client.ModalSubmitted += async (x) =>
         {
-            var ctx = new SocketInteractionContext(Client, x);
+            SocketInteractionContext ctx = new SocketInteractionContext(Client, x);
             await InvokeCommand(ctx, Services);
         };
         await Client.StartAsync();
@@ -159,8 +154,8 @@ Version: {Version}
     {
         try
         {
-            var result = await InteractionServices.ExecuteCommandAsync(context, Services);
-            if(!result.IsSuccess)
+            Discord.Interactions.IResult result = await InteractionServices.ExecuteCommandAsync(context, Services);
+            if (!result.IsSuccess)
             {
                 Log.Error("Error in command!\n" + result.ErrorReason);
             }
@@ -173,7 +168,7 @@ Version: {Version}
 
     private static IServiceProvider ConfigureServices()
     {
-        var map = new ServiceCollection();
+        ServiceCollection map = new ServiceCollection();
 
         //Cheap hack to avoid some retards service checker for fucking properties. 
         //If you have a fucking attribute to ignore the check, USE IT YOU FUCKING DUMBASS!
@@ -194,12 +189,12 @@ Version: {Version}
         if (DestoryCommands)
         {
             Log.Info("Delete Commands!");
-            foreach (var cmd in await Client.GetGlobalApplicationCommandsAsync())
+            foreach (SocketApplicationCommand cmd in await Client.GetGlobalApplicationCommandsAsync())
             {
                 Log.Info($"Delete Global: {cmd.Name}");
                 await cmd.DeleteAsync();
             }
-            foreach (var cmd in Client.Guilds.Select(x => x.GetApplicationCommandsAsync().Result).SelectMany(x => x).ToList())
+            foreach (SocketApplicationCommand cmd in Client.Guilds.Select(x => x.GetApplicationCommandsAsync().Result).SelectMany(x => x).ToList())
             {
                 Log.Info($"Delete Application: {cmd.Name}, Guild: {cmd.Guild.Name}");
                 await cmd.DeleteAsync();
@@ -216,9 +211,9 @@ Version: {Version}
             }
             await InteractionServices.RegisterCommandsGloballyAsync();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Log.Error(ex.ToString()); 
+            Log.Error(ex.ToString());
         }
     }
 

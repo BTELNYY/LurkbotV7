@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace LurkbotV7
 {
@@ -67,7 +62,7 @@ namespace LurkbotV7
             {
                 Console.WriteLine(message);
             }
-            _ = Task.Run(async () => 
+            _ = Task.Run(async () =>
             {
                 StreamWriter sw = new StreamWriter(file, append: true);
                 await sw.WriteAsync(message);

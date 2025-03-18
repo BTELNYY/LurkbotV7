@@ -4,11 +4,6 @@ using Discord.Rest;
 using Discord.WebSocket;
 using LurkbotV7.Attributes;
 using LurkbotV7.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LurkbotV7.Modules
 {
@@ -26,7 +21,7 @@ namespace LurkbotV7.Modules
             SocketUser target = user == null ? Context.User : user;
             bool result = Context.Guild.GetUser(user.Id).GetGuildAvatarUrl(size: 512) == "";
             eb.AddField("Is guild profile?", result);
-            if(result)
+            if (result)
             {
                 eb.WithImageUrl(Context.Guild.GetUser(user.Id).GetGuildAvatarUrl(size: 512));
             }
@@ -66,22 +61,22 @@ namespace LurkbotV7.Modules
         [ModalInteraction("reacted_role_created_modal")]
         public async Task ProccessReactedRoleModal(ReactionRoleCreationModal modal)
         {
-            if(Context.Guild == null)
+            if (Context.Guild == null)
             {
                 await RespondWithErrorAsync("Guild is null.", ephemeral: true);
                 return;
             }
-            if(Context.Channel == null)
+            if (Context.Channel == null)
             {
                 await RespondWithErrorAsync("Channel is null.", ephemeral: true);
                 return;
             }
-            if(Context.Channel is not SocketTextChannel textChannel)
+            if (Context.Channel is not SocketTextChannel textChannel)
             {
                 await RespondWithErrorAsync("Channel is null.", ephemeral: true);
                 return;
             }
-            if(!ulong.TryParse(modal.MessageID, out var messageID))
+            if (!ulong.TryParse(modal.MessageID, out ulong messageID))
             {
                 await RespondWithErrorAsync("Illegal message ID (Not a ulong)", ephemeral: true);
                 return;
@@ -93,12 +88,12 @@ namespace LurkbotV7.Modules
                 return;
             }
             IEmote emote = Emoji.Parse(modal.Reaction);
-            if(emote == null)
+            if (emote == null)
             {
                 await RespondWithErrorAsync("Illegal or invalid emoji. Use Unicode or the :name: format.", ephemeral: true);
                 return;
             }
-            if(!message.Reactions.TryGetValue(emote, out ReactionMetadata value))
+            if (!message.Reactions.TryGetValue(emote, out ReactionMetadata value))
             {
                 await RespondWithErrorAsync("Emoji Not Found on Message.", ephemeral: true);
                 return;
@@ -106,11 +101,11 @@ namespace LurkbotV7.Modules
             IEnumerable<IUser> users = await message.GetReactionUsersAsync(emote, value.ReactionCount).FlattenAsync();
             await DeferAsync(ephemeral: true);
             SocketGuild guild = Context.Guild;
-            _ = Task.Run(async () => 
+            _ = Task.Run(async () =>
             {
                 int addedCount = 0;
                 RestRole role = await guild.CreateRoleAsync(Guid.NewGuid().ToString());
-                foreach (var user in users)
+                foreach (IUser user in users)
                 {
                     SocketGuildUser guildUser = guild.GetUser(user.Id);
                     if (guildUser == null)

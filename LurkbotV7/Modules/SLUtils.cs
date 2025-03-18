@@ -3,12 +3,6 @@ using Discord.Interactions;
 using LurkbotV7.Attributes;
 using LurkbotV7.Config;
 using LurkbotV7.Managers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LurkbotV7.Modules
 {
@@ -20,14 +14,14 @@ namespace LurkbotV7.Modules
             base.OnModuleBuilding(commandService, module);
             SLManager.ListRefreshed += (response) =>
             {
-                _ = Task.Run(async () => 
+                _ = Task.Run(async () =>
                 {
                     string chosenMessage = "";
                     if (!response.Success)
                     {
                         chosenMessage = "Ping btelnyy because something is broken (bad)";
                     }
-                    else if(!response.Servers.Any(x => x.PlayersList.Count() > 0))
+                    else if (!response.Servers.Any(x => x.PlayersList.Count() > 0))
                     {
                         chosenMessage = "All servers are empty.";
                     }
@@ -35,7 +29,7 @@ namespace LurkbotV7.Modules
                     {
                         Server chosenServer = new Server();
                         int players = 0;
-                        foreach (var item in response.Servers)
+                        foreach (Server item in response.Servers)
                         {
                             if (players < item.PlayersList.Count())
                             {

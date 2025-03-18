@@ -1,9 +1,6 @@
-﻿using Discord;
-using Discord.Rest;
+﻿using System.Text.RegularExpressions;
+using Discord;
 using Discord.WebSocket;
-using System.Net;
-using System.Reflection.Metadata.Ecma335;
-using System.Text.RegularExpressions;
 
 namespace LurkbotV7
 {
@@ -16,11 +13,11 @@ namespace LurkbotV7
 
         public static string DownloadAttachment(this IAttachment attachment)
         {
-            using (var client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 string filetype = Path.GetExtension(attachment.Url);
                 HttpResponseMessage response = client.GetAsync(attachment.Url).Result;
-                if(!Directory.Exists(Path.Combine(Program.Config.CachePath)))
+                if (!Directory.Exists(Path.Combine(Program.Config.CachePath)))
                 {
                     Directory.CreateDirectory(Program.Config.CachePath);
                 }
@@ -36,12 +33,12 @@ namespace LurkbotV7
         }
 
         private static void GetMessageTreeRecursive(IMessage message, ref List<IMessage> messages)
-        {     
-            if(message.Reference == null)
+        {
+            if (message.Reference == null)
             {
                 return;
             }
-            if(!message.Reference.ReferenceType.IsSpecified)
+            if (!message.Reference.ReferenceType.IsSpecified)
             {
                 return;
             }
@@ -55,16 +52,16 @@ namespace LurkbotV7
             {
                 return;
             }
-            if(channel is not SocketTextChannel textChannel)
+            if (channel is not SocketTextChannel textChannel)
             {
                 return;
             }
-            if(!message.Reference.MessageId.IsSpecified)
+            if (!message.Reference.MessageId.IsSpecified)
             {
                 return;
             }
             IMessage sockMessage = textChannel.GetMessageAsync(message.Reference.MessageId.Value).Result;
-            if(sockMessage == null)
+            if (sockMessage == null)
             {
                 return;
             }
@@ -83,7 +80,7 @@ namespace LurkbotV7
 
         public static MessageReference GetMessageReference(this SocketMessage message)
         {
-            return new MessageReference(message.Id, message.Channel == null ? null : message.Channel.Id, message.Channel is SocketGuildChannel channel ?  channel.Id : null);
+            return new MessageReference(message.Id, message.Channel == null ? null : message.Channel.Id, message.Channel is SocketGuildChannel channel ? channel.Id : null);
         }
 
         public static string StripMentions(this string messageString)
