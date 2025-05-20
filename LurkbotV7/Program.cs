@@ -1,11 +1,11 @@
-﻿using System.Reflection;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using LurkbotV7.Attributes;
 using LurkbotV7.Config;
 using LurkbotV7.Managers;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -132,17 +132,17 @@ Version: {Version}
         InteractionServices = new InteractionService(Client, interactionServiceConfig);
         Client.SlashCommandExecuted += async (x) =>
         {
-            SocketInteractionContext ctx = new SocketInteractionContext(Client, x);
+            SocketInteractionContext ctx = new(Client, x);
             await InvokeCommand(ctx, Services);
         };
         Client.MessageCommandExecuted += async (x) =>
         {
-            SocketInteractionContext ctx = new SocketInteractionContext(Client, x);
+            SocketInteractionContext ctx = new(Client, x);
             await InvokeCommand(ctx, Services);
         };
         Client.ModalSubmitted += async (x) =>
         {
-            SocketInteractionContext ctx = new SocketInteractionContext(Client, x);
+            SocketInteractionContext ctx = new(Client, x);
             await InvokeCommand(ctx, Services);
         };
         await Client.StartAsync();
@@ -168,7 +168,7 @@ Version: {Version}
 
     private static IServiceProvider ConfigureServices()
     {
-        ServiceCollection map = new ServiceCollection();
+        ServiceCollection map = new();
 
         //Cheap hack to avoid some retards service checker for fucking properties. 
         //If you have a fucking attribute to ignore the check, USE IT YOU FUCKING DUMBASS!

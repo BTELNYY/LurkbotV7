@@ -30,7 +30,7 @@ public static class SLManager
 
     private static int totalPlayerCount = 0;
     public static Player[] allPlayers = new Player[0];
-    public static RestClient client = new RestClient();
+    public static RestClient client = new();
     public static int cooldown = 0;
 
     public static Response GetResponse()
@@ -55,10 +55,10 @@ public static class SLManager
 
     public static Embed[] GetEmbeds()
     {
-        List<Embed> embeds = new List<Embed>();
+        List<Embed> embeds = new();
         if (Response.Servers == null)
         {
-            EmbedBuilder builder = new EmbedBuilder();
+            EmbedBuilder builder = new();
             builder.WithCurrentTimestamp();
             builder.Color = Color.Red;
             builder.WithTitle("Error occured");
@@ -68,7 +68,7 @@ public static class SLManager
         {
             foreach (Server server in Response.Servers)
             {
-                EmbedBuilder builder = new EmbedBuilder();
+                EmbedBuilder builder = new();
                 string name = "No Name";
                 if (Program.Config.IDToName.ContainsKey(server.ID))
                 {
@@ -106,7 +106,7 @@ public static class SLManager
     {
         Log.Debug("Pulling data...");
         Log.Debug("Creating request...");
-        RestRequest request = new RestRequest(Program.Config.APIUrl.Replace("{id}", Program.Config.AccountID.ToString()).Replace("{key}", Program.Config.APIKey), Method.Get);
+        RestRequest request = new(Program.Config.APIUrl.Replace("{id}", Program.Config.AccountID.ToString()).Replace("{key}", Program.Config.APIKey), Method.Get);
         Log.Debug("Fetching...");
         Task<RestResponse> resp = client.ExecuteAsync(request);
         Log.Debug("Deserializing " + resp.Result.Content);
@@ -246,7 +246,7 @@ public static class SLManager
     public static void Init()
     {
         ListRefreshed += PlayerChangeDetector;
-        Thread thread = new Thread(UpdateThread);
+        Thread thread = new(UpdateThread);
         Runner = thread;
         thread.Start();
     }

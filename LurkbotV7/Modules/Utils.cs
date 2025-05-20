@@ -14,7 +14,7 @@ namespace LurkbotV7.Modules
         [RequireContext(ContextType.Guild)]
         public async Task GetAvatar(SocketGuildUser user = null)
         {
-            EmbedBuilder eb = new EmbedBuilder();
+            EmbedBuilder eb = new();
             eb.WithAuthor(Context.User);
             eb.WithColor(Color.Blue);
             eb.WithTitle("Profile Image");
@@ -40,7 +40,7 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(ChannelPermission.ManageRoles)]
         public async Task CreateRoleFromReaction(IMessage message)
         {
-            ReactionRoleCreationModal modal = new ReactionRoleCreationModal();
+            ReactionRoleCreationModal modal = new();
             modal.MessageID = message.Id.ToString();
             await Context.Interaction.RespondWithModalAsync("reacted_role_created_modal", modal);
         }

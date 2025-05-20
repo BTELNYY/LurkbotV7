@@ -10,7 +10,7 @@ namespace LurkbotV7.Modules
     {
         protected virtual Task RespondWithExceptionAsync(Exception ex, bool ephemeral = false)
         {
-            EmbedBuilder builder = new EmbedBuilder();
+            EmbedBuilder builder = new();
             builder.WithColor(Color.Red);
             builder.WithCurrentTimestamp();
             builder.WithTitle("An Exception Occured");
@@ -21,7 +21,7 @@ namespace LurkbotV7.Modules
 
         protected virtual Task RespondWithErrorAsync(string error, string title = "Error", bool ephemeral = false)
         {
-            EmbedBuilder builder = new EmbedBuilder();
+            EmbedBuilder builder = new();
             builder.WithColor(Color.Red);
             builder.WithCurrentTimestamp();
             builder.WithTitle(title);
@@ -35,7 +35,7 @@ namespace LurkbotV7.Modules
 
         protected virtual Task RespondWithSuccesAsync(string success, string title = "Success", bool ephemeral = false)
         {
-            EmbedBuilder builder = new EmbedBuilder();
+            EmbedBuilder builder = new();
             builder.WithColor(Color.Green);
             builder.WithCurrentTimestamp();
             builder.WithTitle(title);
@@ -50,9 +50,24 @@ namespace LurkbotV7.Modules
         public CustomInteractionModuleBase()
         {
             _config = ConfigurationManager.GetConfiguration<T>();
+            ConfigUpdated += CustomInteractionModuleBase_ConfigUpdated;
         }
 
-        private T _config = default(T);
+        private void CustomInteractionModuleBase_ConfigUpdated(T obj)
+        {
+            _config = obj;
+        }
+
+        ~CustomInteractionModuleBase()
+        {
+            ConfigUpdated -= CustomInteractionModuleBase_ConfigUpdated;
+        }
+
+        private event Action<T> ConfigUpdated;
+
+        private object _lock = new();
+
+        private T _config = default;
 
         [DontInject]
         public T Config
@@ -69,12 +84,14 @@ namespace LurkbotV7.Modules
             {
                 _config = value;
                 SaveConfig();
+                ConfigUpdated?.Invoke(value);
             }
         }
 
         public void SaveConfig()
         {
             ConfigurationManager.SaveConfiguration(_config);
+            _config = ConfigurationManager.GetConfiguration<T>();
         }
 
         public void SaveConfig(T config)

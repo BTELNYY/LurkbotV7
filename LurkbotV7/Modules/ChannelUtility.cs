@@ -114,6 +114,6 @@ namespace LurkbotV7.Modules
     {
         public override string FileName => "ChannelUtilsConfig";
 
-        public Dictionary<ulong, List<ulong>> ChannelToAutoReaction = new Dictionary<ulong, List<ulong>>();
+        public Dictionary<ulong, List<ulong>> ChannelToAutoReaction = new();
     }
 }

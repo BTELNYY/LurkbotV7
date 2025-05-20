@@ -4,7 +4,7 @@ namespace LurkbotV7
 {
     public class Log
     {
-        public static object streamLock = new object();
+        public static object streamLock = new();
 
         public static void Message(LogLevel level, string message)
         {
@@ -64,7 +64,7 @@ namespace LurkbotV7
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -77,7 +77,7 @@ namespace LurkbotV7
             {
                 return;
             }
-            StackTrace trace = new StackTrace();
+            StackTrace trace = new();
             Console.ForegroundColor = ConsoleColor.Red;
             string date = DateTime.Now.ToString("dd-MM-yyyy");
             string time = DateTime.Now.ToString("hh\\:mm\\:ss");
@@ -89,7 +89,7 @@ namespace LurkbotV7
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -114,7 +114,7 @@ namespace LurkbotV7
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -138,7 +138,7 @@ namespace LurkbotV7
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -162,7 +162,7 @@ namespace LurkbotV7
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -189,7 +189,7 @@ return;
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -213,7 +213,7 @@ return;
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });
@@ -237,7 +237,7 @@ return;
             }
             _ = Task.Run(async () =>
             {
-                StreamWriter sw = new StreamWriter(file, append: true);
+                StreamWriter sw = new(file, append: true);
                 await sw.WriteAsync(message);
                 sw.Close();
             });

@@ -27,7 +27,7 @@ namespace LurkbotV7.Modules
                     }
                     else
                     {
-                        Server chosenServer = new Server();
+                        Server chosenServer = new();
                         int players = 0;
                         foreach (Server item in response.Servers)
                         {

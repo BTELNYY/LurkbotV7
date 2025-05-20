@@ -13,10 +13,10 @@ namespace LurkbotV7.Modules
         {
             public ulong ChannelID = 0;
             public ulong ServerID = 0;
-            public List<Overwrite> Overwrites = new List<Overwrite>();
+            public List<Overwrite> Overwrites = new();
         }
 
-        public static List<LockedChannel> Channels = new List<LockedChannel>();
+        public static List<LockedChannel> Channels = new();
 
 
         [SlashCommand("lockdown", "Locks the current channel", runMode: RunMode.Async)]
@@ -79,7 +79,7 @@ namespace LurkbotV7.Modules
                 }
                 else
                 {
-                    LockedChannel lockedChannelCreated = new LockedChannel();
+                    LockedChannel lockedChannelCreated = new();
                     lockedChannelCreated.ServerID = textChannel.Guild.Id;
                     lockedChannelCreated.ChannelID = textChannel.Id;
                     SocketRole defaultRole = Program.Client.GetGuild(lockedChannelCreated.ServerID)?.EveryoneRole;
@@ -114,7 +114,7 @@ namespace LurkbotV7.Modules
                             await textChannel.RemovePermissionOverwriteAsync(user);
                         }
                     }
-                    OverwritePermissions permissions = new OverwritePermissions(sendMessages: PermValue.Deny, attachFiles: PermValue.Deny, embedLinks: PermValue.Deny, addReactions: PermValue.Deny);
+                    OverwritePermissions permissions = new(sendMessages: PermValue.Deny, attachFiles: PermValue.Deny, embedLinks: PermValue.Deny, addReactions: PermValue.Deny);
                     await textChannel.AddPermissionOverwriteAsync(defaultRole, permissions);
                     Channels.Add(lockedChannelCreated);
                     typing.Dispose();
@@ -132,7 +132,7 @@ namespace LurkbotV7.Modules
         [RequireUserPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteMessageAuditLog(IMessage message)
         {
-            DeletionModal modal = new DeletionModal();
+            DeletionModal modal = new();
             modal.MessageID = message.Id.ToString();
             await Context.Interaction.RespondWithModalAsync<DeletionModal>("deletion_confirmation", modal);
         }
@@ -154,7 +154,7 @@ namespace LurkbotV7.Modules
         public async Task ProcessDelete(DeletionModal modal)
         {
             IMessage message = Context.Channel.GetMessageAsync(ulong.Parse(modal.MessageID)).Result;
-            EmbedBuilder eb = new EmbedBuilder();
+            EmbedBuilder eb = new();
             if (Context.Channel is not SocketGuildChannel channel)
             {
                 await RespondAsync("This command can only be ran in a guild.");
@@ -184,7 +184,7 @@ namespace LurkbotV7.Modules
                 int counter = 1;
                 foreach (Embed embed in message.Embeds)
                 {
-                    EmbedBuilder builder = new EmbedBuilder();
+                    EmbedBuilder builder = new();
                     switch (embed.Type)
                     {
                         case EmbedType.Video:
@@ -237,7 +237,7 @@ namespace LurkbotV7.Modules
 
         private EmbedBuilder GetAuditEmbedTemplate(SocketAuditLogEntry audit, SocketGuild guild)
         {
-            EmbedBuilder eb = new EmbedBuilder();
+            EmbedBuilder eb = new();
             eb.WithTitle("Audit Log Created");
             eb.WithColor(Color.LighterGrey);
             eb.WithCurrentTimestamp();
@@ -250,7 +250,7 @@ namespace LurkbotV7.Modules
 
         private EmbedBuilder GetAuditEmbedTemplate(SocketUser author, SocketGuild guild)
         {
-            EmbedBuilder eb = new EmbedBuilder();
+            EmbedBuilder eb = new();
             eb.WithTitle("Audit Log Created");
             eb.WithColor(Color.LighterGrey);
             eb.WithCurrentTimestamp();
@@ -347,7 +347,7 @@ namespace LurkbotV7.Modules
 
         public List<ChannelTarget> AuditLogTargets { get; set; } = new List<ChannelTarget>()
         {
-            new ChannelTarget()
+            new()
             {
                 ServerID = 951311770843230238,
                 ChannelID = 1044707676371820545

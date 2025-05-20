@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
-using Discord;
+﻿using Discord;
 using Discord.WebSocket;
+using System.Text.RegularExpressions;
 
 namespace LurkbotV7
 {
@@ -13,7 +13,7 @@ namespace LurkbotV7
 
         public static string DownloadAttachment(this IAttachment attachment)
         {
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new())
             {
                 string filetype = Path.GetExtension(attachment.Url);
                 HttpResponseMessage response = client.GetAsync(attachment.Url).Result;
@@ -80,7 +80,7 @@ namespace LurkbotV7
 
         public static MessageReference GetMessageReference(this SocketMessage message)
         {
-            return new MessageReference(message.Id, message.Channel == null ? null : message.Channel.Id, message.Channel is SocketGuildChannel channel ? channel.Id : null);
+            return new MessageReference(message.Id, message.Channel?.Id, message.Channel is SocketGuildChannel channel ? channel.Id : null);
         }
 
         public static string StripMentions(this string messageString)

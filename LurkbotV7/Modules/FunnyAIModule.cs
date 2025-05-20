@@ -77,7 +77,7 @@ namespace LurkbotV7.Modules
                     //cheap hack
                     string newPrompt = string.IsNullOrEmpty(message.Content) ? "[Blank Message]" : $"{message.Author.Username}: " + message.Content.Replace(magicString, "").StripMentions().Trim();
                     //Log.Info($"Prompt: {newPrompt}\nMemory: ```{memoryGenerated}```\nMessage Tree: {messages.Count}");
-                    GenParams genParams = new GenParams(prompt: newPrompt, memory: memoryGenerated = memoryGenerated.Replace("{botName}", Program.Client.CurrentUser.Username), maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature, stopSequence: messages.Select(x => x.Author.Username).Except(new List<string>() { Program.Client.CurrentUser.Username }).ToList());
+                    GenParams genParams = new(prompt: newPrompt, memory: memoryGenerated = memoryGenerated.Replace("{botName}", Program.Client.CurrentUser.Username), maxLength: Config.MaxGenerationSize, maxContextLength: Config.MaxContextSize, temperature: Config.Temperature, stopSequence: messages.Select(x => x.Author.Username).Except(new List<string>() { Program.Client.CurrentUser.Username }).ToList());
                     ModelOutput output = await AIClient.Generate(genParams);
                     string sResult = string.Join('\n', output.Results.Select(x => x.Text));
                     if (string.IsNullOrWhiteSpace(sResult))
