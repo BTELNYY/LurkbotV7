@@ -134,8 +134,8 @@ public static class SLManager
             Log.Debug("Setting Requested Cooldown to: " + Program.Config.RefreshCooldown + "; Cooldown Used: " + cooldown);
         }
 
-        totalPlayerCount = data.Servers.Sum(x => x.PlayersList.Length);
-        allPlayers = data.Servers.Select(x => x.PlayersList).SelectMany(x => x).ToArray();
+        totalPlayerCount = data.Servers.Where(x => x.PlayersList != null).Sum(x => x.PlayersList.Length);
+        allPlayers = data.Servers.Where(x => x.PlayersList != null).Select(x => x.PlayersList).SelectMany(x => x).ToArray();
 
         Log.Debug($"Playercount: {totalPlayerCount}; (Player Details Omitted for brevity) Cooldown: {cooldown}");
         OldPlayers.Clear();
@@ -194,7 +194,7 @@ public static class SLManager
             }
             IDToObject.Add(p.ID, p);
         }
-        Players = data.Servers.Select(x => x.PlayersList).SelectMany(x => x).ToList();
+        Players = data.Servers.Where(x => x.PlayersList != null).Select(x => x.PlayersList).SelectMany(x => x).ToList();
         Response = data;
         Log.Debug("List Refresh complete, called event");
         ListRefreshed?.Invoke(Response);

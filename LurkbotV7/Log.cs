@@ -65,7 +65,7 @@ namespace LurkbotV7
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -90,7 +90,7 @@ namespace LurkbotV7
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -115,7 +115,7 @@ namespace LurkbotV7
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -139,7 +139,7 @@ namespace LurkbotV7
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -163,7 +163,7 @@ namespace LurkbotV7
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -190,7 +190,7 @@ return;
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -214,7 +214,7 @@ return;
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
@@ -238,7 +238,7 @@ return;
             _ = Task.Run(async () =>
             {
                 StreamWriter sw = new(file, append: true);
-                await sw.WriteAsync(message);
+                await sw.WriteLineAsync(message);
                 sw.Close();
             });
             Console.ResetColor();
